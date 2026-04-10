@@ -1,0 +1,25 @@
+{
+  "task": "B",
+  "language": "German",
+  "seed": 7331,
+  "carriers": {
+    "C1": "Er hat H__t gesagt.",
+    "C2": "Wir haben H__t gesagt."
+  },
+  "vowels": [
+    { "key": "i_long",   "targetToken": "hiet",  "primes": ["sieht", "zieht", "Lied"] },
+    { "key": "i_short",  "targetToken": "hiti",  "primes": ["Bitt", "Ritt", "mit"] },
+    { "key": "e_long",   "targetToken": "heet",  "primes": ["geht", "steht", "weht"] },
+    { "key": "e_short",  "targetToken": "het",   "primes": ["Bett", "nett", "fett"] },
+    { "key": "a_long",   "targetToken": "haht",  "primes": ["Rat", "Tat", "Bad"] },
+    { "key": "a_short",  "targetToken": "hat",   "primes": ["matt", "satt", "glatt"] },
+    { "key": "y_long",   "targetToken": "hueht", "primes": ["müht", "blüht", "glüht"] },
+    { "key": "y_short",  "targetToken": "hyt",   "primes": ["Bütt", "Glück", "Stück"] },
+    { "key": "oe_long",  "targetToken": "hoeht", "primes": ["blöd", "öd", "löt"] },
+    { "key": "oe_short", "targetToken": "hoet",  "primes": ["höll", "könn", "gönn"] },
+    { "key": "o_open",   "targetToken": "hot",   "primes": ["Schrott", "Gott", "Spott"] },
+    { "key": "o_long",   "targetToken": "hoot",  "primes": ["Boot", "Brot", "Not"] },
+    { "key": "u_long",   "targetToken": "huht",  "primes": ["gut", "Blut", "Mut"] },
+    { "key": "u_short",  "targetToken": "hut",   "primes": ["Schutt", "Putt", "Butt"] }
+  ]
+}

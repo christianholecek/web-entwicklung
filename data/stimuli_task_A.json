@@ -1,0 +1,22 @@
+{
+  "task": "A",
+  "language": "English",
+  "seed": 1337,
+  "carriers": {
+    "C1": "Say h__d again.",
+    "C2": "We said h__d together."
+  },
+  "vowels": [
+    { "key": "i_long",  "targetToken": "heed",  "primes": ["need", "seed", "feed"] },
+    { "key": "i_short", "targetToken": "hid",   "primes": ["kid", "lid", "bid"] },
+    { "key": "e_short", "targetToken": "head",  "primes": ["bed", "fed", "led"] },
+    { "key": "ae",      "targetToken": "had",   "primes": ["bad", "mad", "sad"] },
+    { "key": "a_short", "targetToken": "hud",   "primes": ["bud", "mud", "cud"] },
+    { "key": "a_long",  "targetToken": "hard",  "primes": ["card", "lard", "yard"] },
+    { "key": "o_short", "targetToken": "hod",   "primes": ["cod", "nod", "pod"] },
+    { "key": "o_long",  "targetToken": "hoard", "primes": ["fraud", "sawed", "clawed"] },
+    { "key": "u_short", "targetToken": "hood",  "primes": ["good", "could", "would"] },
+    { "key": "u_long",  "targetToken": "who'd", "primes": ["food", "mood", "dude"] },
+    { "key": "er",      "targetToken": "herd",  "primes": ["nerd", "bird", "third"] }
+  ]
+}
