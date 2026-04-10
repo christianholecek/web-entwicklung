@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Speech Recording Tool</title>
+
+  <style>
+    /* ── COLOUR TOKENS ── */
+    :root {
+      --uni-yellow: #ffd500;
+      --uni-black:  #000000;
+      --white:      #ffffff;
+      --muted:      #444444;
+      --border:     #e6e6e6;
+      --pill-bg:    #f7f7f7;
+      --shadow:     0 10px 30px rgba(0,0,0,.08);
+    }
+
+    /* ── RESET & BASE ── */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--white);
+      color: var(--uni-black);
+      font-family: Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    /* ── LAYOUT ── */
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 28px;
+    }
+
+    /* ── HEADER ── */
+    .site-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .site-header h1 { margin: 0; font-size: 22px; }
+    .uni-logo { height: 40px; width: auto; border-radius: 6px; }
+
+    /* ── TYPOGRAPHY ── */
+    h2 { margin: 0 0 6px; font-size: 20px; }
+    h3 { margin: 0 0 6px; font-size: 17px; }
+    p  { margin: 0 0 10px; color: var(--muted); }
+    ul { margin: 6px 0 10px 20px; color: var(--muted); }
+    li { margin: 4px 0; }
+    .muted { color: var(--muted); font-size: 13px; }
+
+    /* ── SCREEN SYSTEM ── */
+    .screen        { display: none; }
+    .screen.active { display: block; }
+
+    /* ── ROWS ── */
+    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+    /* ── FORM ELEMENTS ── */
+    label {
+      display: block;
+      margin: 12px 0 5px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 15px;
+      background: var(--white);
+      color: var(--uni-black);
+    }
+    input:focus, select:focus {
+      outline: 2px solid var(--uni-yellow);
+      outline-offset: 1px;
+    }
+    input[type="checkbox"] { width: auto; margin: 0; }
+
+    /* ── BUTTONS ── */
+    button {
+      padding: 10px 18px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--uni-yellow);
+      color: var(--uni-black);
+    }
+    button:hover   { opacity: .88; }
+    button:active  { opacity: .75; }
+    button[disabled] { opacity: .45; cursor: not-allowed; }
+    .btn-ghost {
+      background: var(--pill-bg);
+      color: var(--uni-black);
+      font-weight: 400;
+    }
+
+    /* ── PILLS ── */
+    .pill {
+      display: inline-block;
+      background: var(--pill-bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* ── DIVIDER ── */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+    /* ── FOOTNOTE ── */
+    .footnote { font-size: 12px; color: var(--muted); margin-top: 14px; }
+
+    /* ════════════════════════════════════
+       SCREEN 0 — group selection
+    ════════════════════════════════════ */
+    .group-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .group-card {
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 24px 20px;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color .15s;
+      background: var(--white);
+    }
+    .group-card:hover      { border-color: var(--uni-yellow); }
+    .group-card .flag      { font-size: 38px; margin-bottom: 10px; }
+    .group-card .grp-label { font-weight: 700; font-size: 16px; color: var(--uni-black); }
+    .group-card .grp-sub   { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    @media (max-width: 520px) { .group-grid { grid-template-columns: 1fr; } }
+
+    /* ════════════════════════════════════
+       SCREEN 1 — consent
+    ════════════════════════════════════ */
+    .consent-box {
+      max-height: 300px;
+      overflow-y: scroll;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      background: var(--pill-bg);
+      font-size: 15px;
+      line-height: 1.5;
+      scrollbar-width: auto;
+      scrollbar-color: rgba(0,0,0,.3) rgba(0,0,0,.06);
+    }
+    .consent-box::-webkit-scrollbar       { width: 10px; }
+    .consent-box::-webkit-scrollbar-track { background: rgba(0,0,0,.05); border-radius: 999px; }
+    .consent-box::-webkit-scrollbar-thumb { background: rgba(0,0,0,.25); border-radius: 999px; }
+    .consent-box p { margin: 0 0 10px; color: var(--muted); }
+    .consent-box strong { color: var(--uni-black); }
+    .scroll-hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 6px 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .scroll-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--uni-yellow);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .consent-check {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .consent-check span { font-size: 15px; color: var(--uni-black); line-height: 1.4; }
+
+    /* ════════════════════════════════════
+       SCREEN 2 — participant details
+    ════════════════════════════════════ */
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 20px;
+    }
+    .details-grid .full { grid-column: 1 / -1; }
+    @media (max-width: 520px) { .details-grid { grid-template-columns: 1fr; } }
+
+    /* ════════════════════════════════════
+       SCREEN 3 — questionnaire placeholder
+    ════════════════════════════════════ */
+    .q-placeholder {
+      background: var(--pill-bg);
+      border: 1px dashed #ccc;
+      border-radius: 10px;
+      padding: 32px;
+      text-align: center;
+      margin: 16px 0;
+    }
+    .q-placeholder .q-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .q-placeholder p { margin: 0; color: var(--muted); }
+
+    /* ════════════════════════════════════
+       SCREEN 4 — task selection
+    ════════════════════════════════════ */
+    .task-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .task-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      background: var(--pill-bg);
+    }
+    .task-card h3 { margin-bottom: 8px; }
+    .task-card p  { font-size: 14px; margin-bottom: 14px; }
+    .done-badge {
+      display: inline-block;
+      background: var(--uni-yellow);
+      color: var(--uni-black);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+    @media (max-width: 560px) { .task-grid { grid-template-columns: 1fr; } }
+
+    /* ════════════════════════════════════
+       SCREEN 6 — mic setup
+    ════════════════════════════════════ */
+    .mic-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 6px;
+    }
+    .mic-row select { flex: 1; }
+    .test-box {
+      margin-top: 16px;
+      background: var(--pill-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .test-prompt {
+      font-size: 17px;
+      font-weight: 600;
+      margin: 10px 0;
+      color: var(--uni-black);
+    }
+
+    /* ════════════════════════════════════
+       SCREEN 7 — recording
+    ════════════════════════════════════ */
+    .prompt-display {
+      font-size: 38px;
+      text-align: center;
+      line-height: 1.2;
+      margin: 20px 0 12px;
+      word-break: break-word;
+      color: var(--uni-black);
+    }
+    .prime-box {
+      background: var(--pill-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin: 12px 0;
+    }
+    .prime-label { font-weight: 700; font-size: 14px; margin-bottom: 8px; }
+    .prime-words { display: flex; gap: 8px; flex-wrap: wrap; }
+    .prime-word {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    /* ════════════════════════════════════
+       UPLOAD OVERLAY
+    ════════════════════════════════════ */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,.82);
+      z-index: 9999;
+    }
+    .overlay.active { display: flex; }
+    .overlay-box {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      max-width: 400px;
+    }
+    .spinner {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 3px solid var(--border);
+      border-top-color: var(--uni-black);
+      animation: spin 1s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+<div class="card">
+
+  <!-- SHARED HEADER (visible on all screens) -->
+  <div class="site-header">
+    <h1>Speech Recording</h1>
+    <img class="uni-logo"
+         src="img/logo_uni_graz.jpg"
+         alt="University of Graz" />
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 0 — group selection
+  ══════════════════════════════════════════ -->
+  <div id="scr-group" class="screen active">
+    <h2>Welcome</h2>
+    <p>Before we begin, please tell us which group you belong to.</p>
+
+    <div class="group-grid">
+      <div class="group-card" id="btnGroupDE">
+        <div class="flag">🇦🇹</div>
+        <div class="grp-label">Native Austrian German speaker</div>
+        <div class="grp-sub">Meine Muttersprache ist Deutsch</div>
+      </div>
+      <div class="group-card" id="btnGroupEN">
+        <div class="flag">🇬🇧</div>
+        <div class="grp-label">Native English speaker</div>
+        <div class="grp-sub">English is my first language</div>
+      </div>
+    </div>
+
+    <p class="footnote">Your selection determines which tasks you will complete and the language of this interface.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 1 — consent
+  ══════════════════════════════════════════ -->
+  <div id="scr-consent" class="screen">
+    <h2>Participant Information &amp; Consent</h2>
+
+    <div class="consent-box">
+      <p><strong>Thank you very much for participating!</strong><br>
+      Please read the following information carefully before you begin.</p>
+
+      <p><strong>What you will do:</strong> You will read short sentences aloud and record yourself. The session takes approximately 20 minutes. You will complete two tasks — you may choose the order.</p>
+
+      <p><strong>Before you start (important):</strong></p>
+      <ul>
+        <li>Please use a laptop or desktop computer (not a phone or tablet).</li>
+        <li>Find a quiet room — close windows and silence notifications.</li>
+        <li>Sit about 30–50 cm from your microphone and speak clearly at a normal volume.</li>
+        <li>For each recording: press <strong>Start recording</strong>, wait one second, speak, wait one second, then press <strong>Stop</strong>.</li>
+      </ul>
+
+      <p><strong>Microphone permission:</strong> Your browser will ask for microphone access — please click <strong>Allow</strong>. You can make a test recording before starting. Test recordings are <strong>not saved</strong>.</p>
+
+      <p><strong>Saving recordings:</strong> After each sentence click <strong>Accept &amp; save</strong>. Your recording will upload — this may take a few seconds. Once the upload is complete you can move to the next sentence.</p>
+
+      <p><strong>Data:</strong> Audio recordings will be stored securely and used only for research purposes. Data will be anonymised for publication.</p>
+
+      <p><strong>Voluntary participation:</strong> Participation is voluntary. You may withdraw at any time before submission.</p>
+
+      <p><strong>Contact:</strong> If you have questions or encounter technical problems, please contact the researcher who sent you this link.</p>
+    </div>
+
+    <div class="scroll-hint">
+      <span class="scroll-dot"></span>
+      Scroll inside the box to read all information ↓
+    </div>
+
+    <div class="consent-check">
+      <input type="checkbox" id="consentChk" />
+      <span>I have read the information above and I consent to participate in this study.</span>
+    </div>
+
+    <div class="row">
+      <button id="btnConsent" disabled>Agree and continue</button>
+      <button id="btnDecline" class="btn-ghost">Decline</button>
+    </div>
+
+    <p class="footnote">You must tick the box above to continue.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 2 — participant details
+  ══════════════════════════════════════════ -->
+  <div id="scr-details" class="screen">
+    <h2>Your details</h2>
+    <p>Please fill in all fields. This information is collected once and used for all tasks.</p>
+
+    <div class="details-grid">
+
+      <div class="full">
+        <label for="pid">Participant ID <span style="color:#c00">*</span></label>
+        <input id="pid" type="text" placeholder="Enter the ID provided by the researcher" autocomplete="off" />
+        <p class="muted" style="margin-top:4px">Enter the ID exactly as given to you.</p>
+      </div>
+
+      <div>
+        <label for="detailYear">Year of birth <span style="color:#c00">*</span></label>
+        <input id="detailYear" type="text" placeholder="e.g. 1990" maxlength="4" inputmode="numeric" autocomplete="off" />
+      </div>
+
+      <div>
+        <label for="detailSex">Sex <span style="color:#c00">*</span></label>
+        <select id="detailSex">
+          <option value="" disabled selected>Please select…</option>
+          <option value="F">Female</option>
+          <option value="M">Male</option>
+          <option value="O">Other / prefer not to say</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="detailState">Bundesland (Austria) <span style="color:#c00">*</span></label>
+        <select id="detailState">
+          <option value="" disabled selected>Please select…</option>
+          <option>Burgenland</option>
+          <option>Kärnten</option>
+          <option>Niederösterreich</option>
+          <option>Oberösterreich</option>
+          <option>Salzburg</option>
+          <option>Steiermark</option>
+          <option>Tirol</option>
+          <option>Vorarlberg</option>
+          <option>Wien</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="detailCity">City / town you grew up in <span style="color:#c00">*</span></label>
+        <input id="detailCity" type="text" placeholder="e.g. Graz" autocomplete="off" />
+      </div>
+
+    </div>
+
+    <hr class="divider" />
+
+    <div class="row">
+      <button id="btnDetailsContinue" disabled>Continue</button>
+      <button id="btnDetailsBack" class="btn-ghost">Back</button>
+    </div>
+
+    <p class="footnote">All fields marked <span style="color:#c00">*</span> are required.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 3 — questionnaire (placeholder)
+  ══════════════════════════════════════════ -->
+  <div id="scr-questionnaire" class="screen">
+    <h2>Background questionnaire</h2>
+    <p>Please answer the following questions about your language background.</p>
+
+    <div class="q-placeholder">
+      <div class="q-label">Placeholder</div>
+      <p>Questions will be added here.</p>
+    </div>
+
+    <div class="row">
+      <button id="btnQContinue">Continue</button>
+      <button id="btnQBack" class="btn-ghost">Back</button>
+    </div>
+
+    <p class="footnote">Your answers help us interpret the recording data correctly.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 4 — task selection
+  ══════════════════════════════════════════ -->
+  <div id="scr-tasks" class="screen">
+    <h2>Choose a task</h2>
+    <p>You must complete both tasks. You may do them in any order. After finishing one you will be brought back here to complete the other.</p>
+
+    <div class="task-grid">
+      <div class="task-card">
+        <h3>Task A — English reading</h3>
+        <p>Read short English sentences aloud and record each one.</p>
+        <button id="btnPickA">Start Task A</button>
+      </div>
+      <div class="task-card">
+        <h3>Task B — German rhyming</h3>
+        <p>Say three rhyming words, then read the displayed sentence aloud.</p>
+        <button id="btnPickB">Start Task B</button>
+      </div>
+    </div>
+
+    <p class="footnote">Take a break of at least 15 minutes between tasks if completing both in one session.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 5 — task instructions
+  ══════════════════════════════════════════ -->
+  <div id="scr-instructions" class="screen">
+    <h2 id="instrTitle">Task instructions</h2>
+    <div id="instrBody" style="color:var(--muted);font-size:15px;margin-top:8px"></div>
+
+    <hr class="divider" />
+
+    <div class="row">
+      <button id="btnInstrOk">I understand — continue</button>
+      <button id="btnInstrBack" class="btn-ghost">Back</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 6 — microphone setup
+  ══════════════════════════════════════════ -->
+  <div id="scr-mic" class="screen">
+    <h2>Microphone setup</h2>
+    <p>Click <strong>Enable microphone</strong> and allow access when prompted by your browser. Then complete a short test recording before you begin.</p>
+
+    <label for="micSel">Microphone device</label>
+    <div class="mic-row">
+      <select id="micSel" disabled>
+        <option value="">Enable microphone to list devices…</option>
+      </select>
+      <button id="btnRefreshMics" class="btn-ghost" disabled>Refresh</button>
+    </div>
+    <p class="muted" style="margin-top:6px">If your recordings are silent, select a different device and redo the test.</p>
+
+    <div class="row" style="margin-top:14px">
+      <button id="btnMicInit">Enable microphone</button>
+      <button id="btnMicBegin" disabled>Begin task</button>
+      <button id="btnMicBackToTask" class="btn-ghost" style="display:none">Back to task</button>
+      <span class="pill" id="micStatus">Microphone: not started</span>
+      <span class="pill" id="micLevel">Level: —</span>
+    </div>
+
+    <div id="testBox" class="test-box" style="display:none">
+      <h3>Test recording</h3>
+      <p style="font-size:14px">Press <strong>Start test</strong>, wait one second, read the sentence below, wait one second, then press <strong>Stop test</strong>. You can repeat this as many times as you like. Test recordings are not saved.</p>
+      <div class="test-prompt">"The North Wind and the Sun were disputing which was the stronger."</div>
+      <div class="row" style="margin-top:10px">
+        <button id="btnTestStart" disabled>Start test</button>
+        <button id="btnTestStop" class="btn-ghost" disabled>Stop test</button>
+        <button id="btnTestPlay" class="btn-ghost" disabled>Play back</button>
+        <button id="btnTestRedo" class="btn-ghost" disabled>Redo</button>
+        <span class="pill" id="testStatus">Not recorded</span>
+      </div>
+      <audio id="testPlayer" controls style="display:none;width:100%;margin-top:10px"></audio>
+    </div>
+
+    <p class="footnote">Use Chrome or Edge for best results. Microphone access is required to participate.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 7 — recording
+  ══════════════════════════════════════════ -->
+  <div id="scr-run" class="screen">
+
+    <div class="row" style="margin-bottom:12px">
+      <span class="pill" id="runTaskLabel">Task —</span>
+      <span class="pill" id="runProgress">Item 1 / N</span>
+      <span class="pill" id="runStatus">Ready</span>
+    </div>
+
+    <div id="primesBox" class="prime-box" style="display:none">
+      <div class="prime-label">Say these three words aloud first:</div>
+      <div class="prime-words" id="primesWords"></div>
+    </div>
+
+    <div id="runGroupTitle" style="font-weight:600;margin-top:10px;color:var(--uni-black)"></div>
+    <div class="prompt-display" id="promptDisplay">—</div>
+    <p id="runHint">Press <strong>Start recording</strong>, read the sentence once, then press <strong>Stop</strong>.</p>
+
+    <div class="row">
+      <button id="btnStartRec">Start recording</button>
+      <button id="btnStopRec" class="btn-ghost" disabled>Stop</button>
+      <button id="btnAccept" disabled>Accept &amp; save</button>
+      <button id="btnNext" class="btn-ghost" disabled>Next ▶</button>
+      <button id="btnRunGoMic" class="btn-ghost">Microphone setup</button>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 8 — done
+  ══════════════════════════════════════════ -->
+  <div id="scr-done" class="screen">
+    <h2>Task complete ✓</h2>
+    <p id="doneSummary"></p>
+
+    <hr class="divider" />
+
+    <div id="doneBackRow">
+      <p><strong>You still need to complete the other task.</strong> Click below to go back and start it.</p>
+      <button id="btnDoneBack">Back to task selection</button>
+    </div>
+
+    <div id="doneAllDone" style="display:none">
+      <p><strong>You have completed both tasks. Thank you very much for participating!</strong></p>
+    </div>
+
+    <p class="footnote">If any upload failed, the files were saved as local downloads instead.</p>
+  </div>
+
+</div><!-- /card -->
+</div><!-- /wrap -->
+
+<!-- UPLOAD OVERLAY -->
+<div id="overlay" class="overlay">
+  <div class="overlay-box">
+    <div class="spinner"></div>
+    <div>
+      <div style="font-weight:700;color:var(--uni-black)" id="overlayTitle">Uploading… please wait</div>
+      <div class="muted" id="overlayMsg">Do not close this tab.</div>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript comes in the next step -->
+
+</body>
+</html>
