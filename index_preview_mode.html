@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Speech Recording Tool</title>
+  <style>
+    :root {
+      --uni-yellow: #ffd500;
+      --uni-black:  #000000;
+      --white:      #ffffff;
+      --muted:      #444444;
+      --border:     #e6e6e6;
+      --pill-bg:    #f7f7f7;
+      --shadow:     0 10px 30px rgba(0,0,0,.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0; background: var(--white); color: var(--uni-black);
+      font-family: Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial; font-size: 16px; line-height: 1.5;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 24px; }
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); padding: 28px; }
+    .site-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--border); }
+    .site-header h1 { margin:0; font-size:22px; }
+    .uni-logo { height:40px; width:auto; border-radius:6px; }
+    h2 { margin:0 0 6px; font-size:20px; }
+    h3 { margin:0 0 6px; font-size:17px; }
+    p { margin:0 0 10px; color:var(--muted); }
+    ul { margin:6px 0 10px 20px; color:var(--muted); }
+    li { margin:4px 0; }
+    .muted { color:var(--muted); font-size:13px; }
+    .screen { display:none; }
+    .screen.active { display:block; }
+    .row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+    .field { flex:1; min-width:220px; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:0 20px; }
+    .grid-3 { display:grid; grid-template-columns:repeat(3, 1fr); gap:0 20px; }
+    @media (max-width:720px){ .grid-2, .grid-3 { grid-template-columns:1fr; } }
+    label { display:block; margin:12px 0 5px; font-weight:600; font-size:14px; }
+    input, select, textarea {
+      width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px;
+      font-family:inherit; font-size:15px; background:var(--white); color:var(--uni-black);
+    }
+    input:focus, select:focus, textarea:focus { outline:2px solid var(--uni-yellow); outline-offset:1px; }
+    textarea { min-height:96px; resize:vertical; }
+    input[type="checkbox"], input[type="radio"] { width:auto; margin:0; }
+    button {
+      padding:10px 18px; border:1px solid var(--border); border-radius:10px; font-family:inherit;
+      font-size:15px; font-weight:700; cursor:pointer; background:var(--uni-yellow); color:var(--uni-black);
+    }
+    button:hover { opacity:.88; }
+    button:active { opacity:.75; }
+    button[disabled] { opacity:.45; cursor:not-allowed; }
+    .btn-ghost { background:var(--pill-bg); color:var(--uni-black); font-weight:400; }
+    .pill { display:inline-block; background:var(--pill-bg); border:1px solid var(--border); border-radius:999px; padding:4px 12px; font-size:13px; color:var(--muted); }
+    .divider { border:none; border-top:1px solid var(--border); margin:20px 0; }
+    .footnote { font-size:12px; color:var(--muted); margin-top:14px; }
+    .group-grid, .task-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:16px; }
+    @media (max-width:560px){ .group-grid, .task-grid { grid-template-columns:1fr; } }
+    .group-card, .task-card, .q-card {
+      border:1px solid var(--border); border-radius:14px; padding:20px; background:var(--pill-bg);
+    }
+    .group-card { border-width:2px; cursor:pointer; text-align:center; transition:border-color .15s; background:var(--white); }
+    .group-card:hover { border-color:var(--uni-yellow); }
+    .group-card .flag { font-size:38px; margin-bottom:10px; }
+    .group-card .grp-label { font-weight:700; font-size:16px; color:var(--uni-black); }
+    .group-card .grp-sub { font-size:13px; color:var(--muted); margin-top:4px; }
+    .consent-box {
+      max-height:320px; overflow-y:scroll; border:1px solid var(--border); border-radius:10px;
+      padding:14px 16px; background:var(--pill-bg); font-size:15px; line-height:1.45;
+      scrollbar-width:auto; scrollbar-color:rgba(0,0,0,.3) rgba(0,0,0,.06);
+    }
+    .consent-box::-webkit-scrollbar { width:10px; }
+    .consent-box::-webkit-scrollbar-track { background:rgba(0,0,0,.05); border-radius:999px; }
+    .consent-box::-webkit-scrollbar-thumb { background:rgba(0,0,0,.25); border-radius:999px; }
+    .scroll-hint { font-size:12px; color:var(--muted); margin:6px 0 14px; display:flex; align-items:center; gap:6px; }
+    .scroll-dot { width:7px; height:7px; border-radius:50%; background:var(--uni-yellow); border:1px solid var(--border); flex-shrink:0; }
+    .consent-check { display:flex; align-items:flex-start; gap:10px; margin:14px 0; }
+    .consent-check span { font-size:15px; color:var(--uni-black); line-height:1.4; }
+    .choice-inline { display:flex; gap:14px; flex-wrap:wrap; align-items:center; margin-top:8px; }
+    .choice-inline label, .checkbox-group label { display:flex; align-items:center; gap:8px; font-weight:400; margin:4px 0; }
+    .checkbox-group { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px; }
+    @media (max-width:720px){ .checkbox-group { grid-template-columns:1fr; } }
+    .hidden { display:none !important; }
+    .step-badges { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+    .step-badge { display:inline-block; background:var(--pill-bg); border:1px solid var(--border); border-radius:999px; padding:6px 10px; font-size:12px; color:var(--muted); }
+    .mic-row { display:flex; gap:10px; align-items:center; margin-top:6px; }
+    .mic-row select { flex:1; }
+    .test-box, .prime-box { margin-top:16px; background:var(--pill-bg); border:1px solid var(--border); border-radius:10px; padding:16px; }
+    .test-prompt { font-size:17px; font-weight:600; margin:10px 0; color:var(--uni-black); }
+    .prompt-display { font-size:38px; text-align:center; line-height:1.2; margin:20px 0 12px; word-break:break-word; color:var(--uni-black); }
+    .prime-label { font-weight:700; font-size:14px; margin-bottom:8px; }
+    .prime-words { display:flex; gap:8px; flex-wrap:wrap; }
+    .prime-word { background:var(--white); border:1px solid var(--border); border-radius:999px; padding:5px 14px; font-weight:700; font-size:15px; }
+    .overlay {
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(255,255,255,.82); z-index:9999;
+    }
+    .overlay.active { display:flex; }
+    .overlay-box { background:var(--white); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow); padding:20px 24px; display:flex; align-items:center; gap:16px; max-width:420px; }
+    .spinner { width:20px; height:20px; border-radius:50%; border:3px solid var(--border); border-top-color:var(--uni-black); animation:spin 1s linear infinite; flex-shrink:0; }
+    .preview-pill { display:inline-flex; align-items:center; gap:8px; font-size:12px; padding:7px 12px; border-radius:999px; border:1px solid var(--border); background:var(--pill-bg); color:var(--uni-black); }
+    .preview-pill.active { background:var(--uni-yellow); font-weight:700; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div class="wrap">
+<div class="card">
+  <div class="site-header">
+    <h1 id="siteTitle">Speech Recording</h1>
+    <div class="row" style="margin-left:auto; justify-content:flex-end">
+      <button id="btnPreviewMode" type="button" class="btn-ghost preview-pill">Preview mode: off</button>
+      <img class="uni-logo" src="img/logo_uni_graz_4c.jpg" alt="University of Graz" />
+    </div>
+  </div>
+
+  <div id="scr-group" class="screen active">
+    <h2 id="groupTitleMain">Welcome</h2>
+    <p id="groupIntro">Before we begin, please tell us which group you belong to.</p>
+    <div class="group-grid">
+      <div class="group-card" id="btnGroupDE">
+        <div class="flag">🇦🇹</div>
+        <div class="grp-label" id="groupDELabel">Native Austrian German speaker</div>
+        <div class="grp-sub" id="groupDESub">Meine Muttersprache ist Deutsch</div>
+      </div>
+      <div class="group-card" id="btnGroupEN">
+        <div class="flag">🇬🇧</div>
+        <div class="grp-label" id="groupENLabel">Native English speaker</div>
+        <div class="grp-sub" id="groupENSub">English is my first language</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="scr-consent" class="screen">
+    <h2 id="consentHeading"></h2>
+    <div class="consent-box" id="consentBox"></div>
+    <div class="scroll-hint"><span class="scroll-dot"></span><span id="scrollHintText"></span></div>
+    <div class="row" style="margin-top:12px; width:100%">
+      <div class="field">
+        <label for="stateSel" id="stateSelLabel"></label>
+        <select id="stateSel"></select>
+      </div>
+      <div class="field">
+        <label for="citySel" id="citySelLabel"></label>
+        <input id="citySel" />
+      </div>
+    </div>
+    <div class="consent-check">
+      <input type="checkbox" id="consentChk" />
+      <span id="consentCheckText"></span>
+    </div>
+    <div class="row">
+      <button id="btnConsent" disabled></button>
+      <button id="btnDecline" class="btn-ghost"></button>
+    </div>
+    <p class="footnote" id="consentFootnote"></p>
+  </div>
+
+  <div id="scr-quest-1" class="screen">
+    <div class="step-badges"><span class="step-badge" id="q1Badge1"></span><span class="step-badge" id="q1Badge2"></span></div>
+    <h2 id="q1Heading"></h2>
+    <div class="q-card">
+      <div class="grid-2">
+        <div class="field"><label for="pid" id="pidLabel"></label><input id="pid" autocomplete="off" /></div>
+        <div class="field"><label for="birthYear" id="birthYearLabel"></label><input id="birthYear" type="number" min="1900" max="2100" /></div>
+        <div class="field"><label for="sexSel" id="sexLabel"></label><select id="sexSel"><option value="" selected disabled></option><option value="F"></option><option value="M"></option><option value="O"></option></select></div>
+        <div class="field"><label for="arrivalYear" id="arrivalYearLabel"></label><input id="arrivalYear" type="number" min="1900" max="2100" /></div>
+        <div class="field"><label for="householdCount" id="householdCountLabel"></label><input id="householdCount" type="number" min="0" /></div>
+      </div>
+      <div class="grid-3" style="margin-top:12px">
+        <div class="field"><label for="derivedAge" id="derivedAgeLabel"></label><input id="derivedAge" disabled /></div>
+        <div class="field"><label for="derivedAgeMigration" id="derivedAgeMigrationLabel"></label><input id="derivedAgeMigration" disabled /></div>
+        <div class="field"><label for="derivedDuration" id="derivedDurationLabel"></label><input id="derivedDuration" disabled /></div>
+      </div>
+    </div>
+    <div class="q-card">
+      <label id="livedAbroadLabel"></label>
+      <div class="choice-inline">
+        <label><input type="radio" name="livedAbroad" value="1"><span class="txt-yes"></span></label>
+        <label><input type="radio" name="livedAbroad" value="0"><span class="txt-no"></span></label>
+      </div>
+      <div id="livedAbroadDetails" class="hidden">
+        <div class="grid-2" style="margin-top:10px">
+          <div class="field"><label for="abroadYears" id="abroadYearsLabel"></label><input id="abroadYears" type="number" min="0" step="0.5" /></div>
+          <div class="field"><label for="abroadCountry" id="abroadCountryLabel"></label><input id="abroadCountry" /></div>
+          <div class="field"><label for="abroadFrom" id="abroadFromLabel"></label><input id="abroadFrom" type="number" min="1900" max="2100" /></div>
+          <div class="field"><label for="abroadTo" id="abroadToLabel"></label><input id="abroadTo" type="number" min="1900" max="2100" /></div>
+        </div>
+      </div>
+    </div>
+    <div class="q-card">
+      <label id="prePrimaryLabel"></label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="prePrimaryLang" value="English"><span id="prePrimaryEnglish"></span></label>
+        <label><input type="checkbox" name="prePrimaryLang" value="German"><span id="prePrimaryGerman"></span></label>
+        <label><input type="checkbox" id="prePrimaryOtherChk" name="prePrimaryLang" value="Other"><span id="prePrimaryOtherChkText"></span></label>
+      </div>
+      <div id="prePrimaryOtherWrap" class="hidden" style="margin-top:10px">
+        <label for="prePrimaryOther" id="prePrimaryOtherLabel"></label>
+        <input id="prePrimaryOther" />
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px"><button id="btnQ1Next"></button></div>
+  </div>
+
+  <div id="scr-quest-2" class="screen">
+    <div class="step-badges"><span class="step-badge" id="q2Badge1"></span><span class="step-badge" id="q2Badge2"></span></div>
+    <h2 id="q2Heading"></h2>
+    <div class="q-card">
+      <label id="germanBeforeLabel"></label>
+      <div class="choice-inline">
+        <label><input type="radio" name="germanBefore" value="1"><span class="txt-yes"></span></label>
+        <label><input type="radio" name="germanBefore" value="0"><span class="txt-no"></span></label>
+      </div>
+      <div id="germanBeforeDetails" class="hidden" style="margin-top:10px">
+        <div class="grid-2">
+          <div class="field"><label for="germanBeforeVariety" id="germanBeforeVarietyLabel"></label><select id="germanBeforeVariety"></select></div>
+          <div class="field"><label for="germanBeforeLastYear" id="germanBeforeLastYearLabel"></label><input id="germanBeforeLastYear" type="number" min="1900" max="2100" /></div>
+        </div>
+      </div>
+    </div>
+    <div class="q-card">
+      <label id="germanAustriaLabel"></label>
+      <div class="choice-inline">
+        <label><input type="radio" name="germanAustria" value="1"><span class="txt-yes"></span></label>
+        <label><input type="radio" name="germanAustria" value="0"><span class="txt-no"></span></label>
+      </div>
+      <div id="germanAustriaDetails" class="hidden" style="margin-top:10px">
+        <div class="grid-2">
+          <div class="field"><label for="germanAustriaVariety" id="germanAustriaVarietyLabel"></label><select id="germanAustriaVariety"></select></div>
+          <div class="field"><label for="germanAustriaLastYear" id="germanAustriaLastYearLabel"></label><input id="germanAustriaLastYear" type="number" min="1900" max="2100" /></div>
+        </div>
+      </div>
+    </div>
+    <div class="q-card"><h3 id="profBeforeHeading"></h3><div id="profBeforeWrap"></div></div>
+    <div class="q-card"><h3 id="profNowHeading"></h3><div id="profNowWrap"></div></div>
+    <div class="row" style="margin-top:12px"><button id="btnQ2Back" class="btn-ghost"></button><button id="btnQ2Next"></button></div>
+  </div>
+
+  <div id="scr-quest-3" class="screen">
+    <div class="step-badges"><span class="step-badge" id="q3Badge1"></span><span class="step-badge" id="q3Badge2"></span></div>
+    <h2 id="q3Heading"></h2>
+    <div id="generalScalesWrap"></div>
+    <div class="q-card">
+      <label id="expatCommunityLabel"></label>
+      <div class="choice-inline"><label><input type="radio" name="expatCommunity" value="1"><span class="txt-yes"></span></label><label><input type="radio" name="expatCommunity" value="0"><span class="txt-no"></span></label></div>
+      <div id="expatDetails" class="hidden" style="margin-top:10px"><label for="expatSinceYear" id="expatSinceYearLabel"></label><input id="expatSinceYear" type="number" min="1900" max="2100" /></div>
+    </div>
+    <div class="q-card">
+      <label id="backToUKLabel"></label>
+      <div class="choice-inline"><label><input type="radio" name="backToUK" value="1"><span class="txt-yes"></span></label><label><input type="radio" name="backToUK" value="0"><span class="txt-no"></span></label></div>
+      <div id="backToUKDetails" class="hidden" style="margin-top:10px"><label for="ukStayDuration" id="ukStayDurationLabel"></label><input id="ukStayDuration" /></div>
+    </div>
+    <div class="row" style="margin-top:12px"><button id="btnQ3Back" class="btn-ghost"></button><button id="btnQ3Next"></button></div>
+  </div>
+
+  <div id="scr-quest-4" class="screen">
+    <div class="step-badges"><span class="step-badge" id="q4Badge1"></span><span class="step-badge" id="q4Badge2"></span></div>
+    <h2 id="q4Heading"></h2>
+    <div class="q-card">
+      <label id="hhSpeakLabel"></label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="hhSpeakEnglishChk"><span id="hhSpeakEnglishText"></span></label>
+        <label><input type="checkbox" id="hhSpeakGermanChk"><span id="hhSpeakGermanText"></span></label>
+        <label><input type="checkbox" id="hhSpeakOtherChk"><span id="hhSpeakOtherText"></span></label>
+      </div>
+      <div class="grid-2" style="margin-top:10px">
+        <div class="field hidden" id="hhEnglishVarietyWrap"><label for="hhEnglishVariety" id="hhEnglishVarietyLabel"></label><select id="hhEnglishVariety"></select></div>
+        <div class="field hidden" id="hhGermanVarietyWrap"><label for="hhGermanVariety" id="hhGermanVarietyLabel"></label><input id="hhGermanVariety" /></div>
+        <div class="field hidden" id="hhOtherSpeakWrap"><label for="hhOtherSpeak" id="hhOtherSpeakLabel"></label><input id="hhOtherSpeak" /></div>
+      </div>
+    </div>
+    <div class="q-card">
+      <label for="hhYouToThem" id="hhYouToThemLabel"></label>
+      <select id="hhYouToThem"></select>
+      <div class="grid-2" style="margin-top:10px">
+        <div class="field hidden" id="hhYouToThemOtherWrap"><label for="hhYouToThemOther" id="hhYouToThemOtherLabel"></label><input id="hhYouToThemOther" /></div>
+        <div class="field hidden" id="hhYouToThemGermanWrap"><label for="hhYouToThemGermanVariety" id="hhYouToThemGermanVarietyLabel"></label><input id="hhYouToThemGermanVariety" /></div>
+      </div>
+    </div>
+    <div class="q-card">
+      <label for="hhThemToYou" id="hhThemToYouLabel"></label>
+      <select id="hhThemToYou"></select>
+      <div class="grid-2" style="margin-top:10px">
+        <div class="field hidden" id="hhThemToYouOtherWrap"><label for="hhThemToYouOther" id="hhThemToYouOtherLabel"></label><input id="hhThemToYouOther" /></div>
+        <div class="field hidden" id="hhThemToYouEnglishWrap"><label for="hhThemToYouEnglishVariety" id="hhThemToYouEnglishVarietyLabel"></label><input id="hhThemToYouEnglishVariety" /></div>
+        <div class="field hidden" id="hhThemToYouGermanWrap"><label for="hhThemToYouGermanVariety" id="hhThemToYouGermanVarietyLabel"></label><input id="hhThemToYouGermanVariety" /></div>
+      </div>
+    </div>
+    <div class="q-card">
+      <label id="hasChildrenLabel"></label>
+      <div class="choice-inline"><label><input type="radio" name="hasChildren" value="1"><span class="txt-yes"></span></label><label><input type="radio" name="hasChildren" value="0"><span class="txt-no"></span></label></div>
+      <div id="childrenDetails" class="hidden" style="margin-top:10px">
+        <div class="grid-3">
+          <div class="field"><label id="childEnglishNamesLabel"></label><div class="choice-inline"><label><input type="radio" name="childEnglishNames" value="1"><span class="txt-yes"></span></label><label><input type="radio" name="childEnglishNames" value="0"><span class="txt-no"></span></label></div></div>
+          <div class="field"><label id="childGermanNamesLabel"></label><div class="choice-inline"><label><input type="radio" name="childGermanNames" value="1"><span class="txt-yes"></span></label><label><input type="radio" name="childGermanNames" value="0"><span class="txt-no"></span></label></div></div>
+          <div class="field"><label id="childOtherNamesLabel"></label><div class="choice-inline"><label><input type="radio" name="childOtherNames" value="1"><span class="txt-yes"></span></label><label><input type="radio" name="childOtherNames" value="0"><span class="txt-no"></span></label></div></div>
+        </div>
+        <div id="childOtherNamesWrap" class="hidden" style="margin-top:10px"><label for="childOtherNamesText" id="childOtherNamesTextLabel"></label><input id="childOtherNamesText" /></div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px"><button id="btnQ4Back" class="btn-ghost"></button><button id="btnQ4Next"></button></div>
+  </div>
+
+  <div id="scr-quest-5" class="screen">
+    <div class="step-badges"><span class="step-badge" id="q5Badge1"></span><span class="step-badge" id="q5Badge2"></span></div>
+    <h2 id="q5Heading"></h2>
+    <div class="q-card"><label id="ukContactFreqLabel"></label><div class="choice-inline" id="ukContactFreqWrap"></div></div>
+    <div class="q-card"><label for="ukContactLanguage" id="ukContactLanguageLabel"></label><select id="ukContactLanguage"></select><div id="ukContactLanguageOtherWrap" class="hidden" style="margin-top:10px"><label for="ukContactLanguageOther" id="ukContactLanguageOtherLabel"></label><input id="ukContactLanguageOther" /></div></div>
+    <div class="q-card"><label for="ukContactMethod" id="ukContactMethodLabel"></label><input id="ukContactMethod" /></div>
+    <div class="row" style="margin-top:12px"><button id="btnQ5Back" class="btn-ghost"></button><button id="btnQ5Next"></button></div>
+  </div>
+
+  <div id="scr-quest-6" class="screen">
+    <div class="step-badges"><span class="step-badge" id="q6Badge1"></span><span class="step-badge" id="q6Badge2"></span></div>
+    <h2 id="q6Heading"></h2>
+    <div class="q-card"><h3 id="germanDomainsHeading"></h3><div id="germanDomainsWrap"></div></div>
+    <div class="q-card"><h3 id="englishDomainsHeading"></h3><div id="englishDomainsWrap"></div></div>
+    <div class="row" style="margin-top:12px"><button id="btnQ6Back" class="btn-ghost"></button><button id="btnQ6Next"></button></div>
+  </div>
+
+  <div id="scr-quest-7" class="screen">
+    <div class="step-badges"><span class="step-badge" id="q7Badge1"></span><span class="step-badge" id="q7Badge2"></span></div>
+    <h2 id="q7Heading"></h2>
+    <div class="q-card"><label id="watchBritishTVLabel"></label><div class="choice-inline"><label><input type="radio" name="watchBritishTV" value="1"><span class="txt-yes"></span></label><label><input type="radio" name="watchBritishTV" value="0"><span class="txt-no"></span></label></div></div>
+    <div class="q-card"><label id="listenBritishRadioLabel"></label><div class="choice-inline"><label><input type="radio" name="listenBritishRadio" value="1"><span class="txt-yes"></span></label><label><input type="radio" name="listenBritishRadio" value="0"><span class="txt-no"></span></label></div></div>
+    <div class="q-card"><label id="readBritishMediaLabel"></label><div class="choice-inline"><label><input type="radio" name="readBritishMedia" value="1"><span class="txt-yes"></span></label><label><input type="radio" name="readBritishMedia" value="0"><span class="txt-no"></span></label></div></div>
+    <div class="q-card"><label id="listenAustrianRadioLabel"></label><div class="choice-inline"><label><input type="radio" name="listenAustrianRadio" value="1"><span class="txt-yes"></span></label><label><input type="radio" name="listenAustrianRadio" value="0"><span class="txt-no"></span></label></div></div>
+    <div class="q-card" id="mediaScalesWrap"></div>
+    <div class="row" style="margin-top:12px"><button id="btnQ7Back" class="btn-ghost"></button><button id="btnQ7Next"></button></div>
+  </div>
+
+  <div id="scr-quest-8" class="screen">
+    <div class="step-badges"><span class="step-badge" id="q8Badge1"></span><span class="step-badge" id="q8Badge2"></span></div>
+    <h2 id="q8Heading"></h2>
+    <div class="q-card">
+      <label id="othersCommentEnglishLabel"></label>
+      <div class="choice-inline"><label><input type="radio" name="othersCommentEnglish" value="1"><span class="txt-yes"></span></label><label><input type="radio" name="othersCommentEnglish" value="0"><span class="txt-no"></span></label></div>
+      <div id="othersCommentDetails" class="hidden" style="margin-top:10px"><div class="checkbox-group"><label><input type="checkbox" id="commentAccent"><span id="commentAccentText"></span></label><label><input type="checkbox" id="commentSounds"><span id="commentSoundsText"></span></label><label><input type="checkbox" id="commentWords"><span id="commentWordsText"></span></label><label><input type="checkbox" id="commentWordOrder"><span id="commentWordOrderText"></span></label><label><input type="checkbox" id="commentPitch"><span id="commentPitchText"></span></label><label><input type="checkbox" id="commentGrammar"><span id="commentGrammarText"></span></label></div></div>
+    </div>
+    <div class="q-card">
+      <label id="englishChangedLabel"></label>
+      <div class="choice-inline"><label><input type="radio" name="englishChanged" value="1"><span class="txt-yes"></span></label><label><input type="radio" name="englishChanged" value="0"><span class="txt-no"></span></label></div>
+      <div id="englishChangedDetails" class="hidden" style="margin-top:10px"><div class="checkbox-group"><label><input type="checkbox" id="changedAccent"><span id="changedAccentText"></span></label><label><input type="checkbox" id="changedSounds"><span id="changedSoundsText"></span></label><label><input type="checkbox" id="changedWords"><span id="changedWordsText"></span></label><label><input type="checkbox" id="changedWordOrder"><span id="changedWordOrderText"></span></label><label><input type="checkbox" id="changedPitch"><span id="changedPitchText"></span></label><label><input type="checkbox" id="changedGrammar"><span id="changedGrammarText"></span></label></div></div>
+    </div>
+    <div class="q-card"><label for="finalComment" id="finalCommentLabel"></label><textarea id="finalComment"></textarea></div>
+    <div class="row" style="margin-top:12px"><button id="btnQ8Back" class="btn-ghost"></button><button id="btnQuestionnaireDone"></button></div>
+  </div>
+
+  <div id="scr-taskselect" class="screen">
+    <h2 id="taskSelectHeading"></h2>
+    <p id="taskSelectIntro"></p>
+    <div class="task-grid">
+      <div class="task-card"><h3 id="taskACardTitle"></h3><p id="taskACardDesc"></p><button id="btnPickA"></button></div>
+      <div class="task-card"><h3 id="taskBCardTitle"></h3><p id="taskBCardDesc"></p><button id="btnPickB"></button></div>
+    </div>
+    <p class="footnote" id="taskSelectFootnote"></p>
+  </div>
+
+  <div id="scr-instr" class="screen">
+    <h2 id="instrTitle"></h2>
+    <div id="instrBody" style="color:var(--muted); font-size:15px; margin-top:8px"></div>
+    <hr class="divider" />
+    <div class="row"><button id="btnInstrOk"></button><button id="btnBackToTasks2" class="btn-ghost"></button></div>
+  </div>
+
+  <div id="scr-mic" class="screen">
+    <h2 id="micHeading"></h2>
+    <p id="micIntro"></p>
+    <label for="micSel" id="micSelLabel"></label>
+    <div class="mic-row"><select id="micSel" disabled><option value=""></option></select><button id="btnRefreshMics" class="btn-ghost" disabled></button></div>
+    <p class="muted" style="margin-top:6px" id="micHelp"></p>
+    <div class="row" style="margin-top:14px"><button id="btnInit"></button><button id="btnBeginTask" disabled></button><button id="btnBackToTask" class="btn-ghost" style="display:none"></button><span class="pill" id="status"></span><span class="pill" id="sr">sr: —</span><span class="pill" id="level"></span></div>
+    <div id="testBox" class="test-box" style="display:none"><h3 id="testTitle"></h3><p id="testIntro"></p><div class="test-prompt" id="testPrompt"></div><div class="row" style="margin-top:10px"><button id="btnTestStart" disabled></button><button id="btnTestStop" class="btn-ghost" disabled></button><button id="btnTestPlay" class="btn-ghost" disabled></button><button id="btnTestRedo" class="btn-ghost" disabled></button><span class="pill" id="testStatus"></span></div><audio id="testPlayer" controls style="display:none;width:100%;margin-top:10px"></audio></div>
+    <p class="footnote" id="micFootnote"></p>
+  </div>
+
+  <div id="scr-run" class="screen">
+    <div class="row" style="margin-bottom:12px"><span class="pill" id="runTaskLabel">Task —</span><span class="pill" id="progress">Item 1 / N</span><span class="pill" id="runStatus"></span></div>
+    <div id="primesBox" class="prime-box" style="display:none"><div class="prime-label" id="primeLabel"></div><div class="prime-words" id="primesWords"></div></div>
+    <div id="groupTitle" style="font-weight:600;margin-top:10px;color:var(--uni-black)"></div>
+    <div class="prompt-display" id="promptDisplay">—</div>
+    <p id="runHint"></p>
+    <div class="row"><button id="btnStartRec"></button><button id="btnStopRec" class="btn-ghost" disabled></button><button id="btnAccept" disabled></button><button id="btnNext" class="btn-ghost" disabled></button><button id="btnGoMic" class="btn-ghost"></button></div>
+  </div>
+
+  <div id="scr-done" class="screen">
+    <h2 id="doneHeading"></h2>
+    <p id="summary"></p>
+    <hr class="divider" />
+    <button id="btnBackToTasksDone"></button>
+    <p class="footnote" id="doneFootnote"></p>
+  </div>
+
+  <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border);text-align:center">
+    <a href="imprint.html" style="font-size:12px;color:var(--muted);text-decoration:none">Impressum / Imprint</a>
+  </div>
+</div>
+</div>
+
+<div id="overlay" class="overlay">
+  <div class="overlay-box"><div class="spinner"></div><div><div style="font-weight:700;color:var(--uni-black)" id="overlayTitle"></div><div class="muted" id="overlayMsg"></div></div></div>
+</div>
+
+<script>
+(function(){
+  const UPLOAD_URL = "https://script.google.com/macros/s/AKfycbyu__fIr1DfRuYwVV12q17YJVYGRxHWv0DtG6VLJGqkCv8Rmz0y0UC_iZikr8NcFB14iQ/exec";
+  const MAX_REC_SECONDS = 30;
+  const SILENCE_PEAK_THRESHOLD = 0.01;
+  const STATE_OPTIONS = ["Burgenland","Kärnten","Niederösterreich","Oberösterreich","Salzburg","Steiermark","Tirol","Vorarlberg","Wien"];
+
+  const I18N = {
+    en: {
+      htmlLang: 'en', title: 'Speech Recording Tool', siteTitle: 'Speech Recording',
+      groupTitleMain: 'Welcome', groupIntro: 'Before we begin, please tell us which group you belong to.',
+      groupDELabel: 'Native Austrian German speaker', groupDESub: 'Meine Muttersprache ist Deutsch',
+      groupENLabel: 'Native English speaker', groupENSub: 'English is my first language',
+      consentHeading: 'Participant Information & Consent',
+      consentBox: `
+        <p><strong>Thank you very much for participating!</strong><br>Please read the following information carefully before you begin.</p>
+        <p><strong>About this study:</strong> This recording study is part of ongoing research on phonetic language attrition at the University of Graz. Your recordings help us understand how native language pronunciation changes under long-term second-language exposure.</p>
+        <p><strong>What you will do:</strong> You will answer a short background questionnaire and record short speech items. The full session takes around 20 minutes.</p>
+        <p><strong>Before you start:</strong></p>
+        <ul>
+          <li>Please use a laptop or desktop computer, not a phone or tablet.</li>
+          <li>Find a quiet room and silence notifications.</li>
+          <li>Sit 30–50 cm from the microphone and speak clearly at a normal volume.</li>
+          <li>For each recording: click <strong>Start recording</strong>, wait one second, speak, wait one second, then click <strong>Stop</strong>.</li>
+        </ul>
+        <p><strong>Microphone permission:</strong> Your browser will ask for microphone access. Please click <strong>Allow</strong>. You can make a test recording first. Test recordings are not saved.</p>
+        <p><strong>Data:</strong> Audio recordings and questionnaire responses will be stored securely and used only for research purposes. Data will be anonymised for publication.</p>
+        <p><strong>Voluntary participation:</strong> Participation is voluntary. You may withdraw at any time before submission.</p>
+      `,
+      scrollHintText: 'Scroll inside the box to read all information ↓', stateSelLabel: 'Bundesland (Austria)', citySelLabel: 'City / town', cityPlaceholder: 'e.g. Graz',
+      consentCheckText: 'I have read the information above and I consent to participate in this study.', btnConsent: 'Agree and continue', btnDecline: 'Decline', consentFootnote: 'You must complete the location fields and tick the box to continue.',
+      yes:'Yes', no:'No', other:'Other', pleaseSelect:'Please select…', continue:'Continue', back:'Back',
+      q1Badge1:'Questionnaire step 1 of 8', q1Badge2:'Background', q1Heading:'Basic background', pidLabel:'Participant ID', pidPlaceholder:'Enter the ID provided by the researcher',
+      birthYearLabel:'Year of birth', arrivalYearLabel:'When did you come to Austria (year)?', householdCountLabel:'How many people live in your household besides yourself?', derivedAgeLabel:'Age', derivedAgeMigrationLabel:'Age at migration', derivedDurationLabel:'Duration living in Austria',
+      livedAbroadLabel:'Apart from Austria, have you ever lived in a country other than the UK for longer than 6 months?', abroadYearsLabel:'If yes: number of years', abroadCountryLabel:'If yes: country', abroadFromLabel:'From year', abroadToLabel:'To year',
+      prePrimaryLabel:'What language(s) did you acquire before starting primary school?', prePrimaryEnglish:'English', prePrimaryGerman:'German', prePrimaryOtherChkText:'Other', prePrimaryOtherLabel:'If other, please indicate which language(s)',
+      q2Badge1:'Questionnaire step 2 of 8', q2Badge2:'German learning', q2Heading:'German learning background', germanBeforeLabel:'Did you attend any German classes before coming to Austria?', germanBeforeVarietyLabel:'Variety of German taught', germanBeforeLastYearLabel:'When (year) did you last take these classes?', germanAustriaLabel:'Did you attend any German classes in Austria?', germanAustriaVarietyLabel:'Variety of German taught', germanAustriaLastYearLabel:'When (year) did you last take these classes?', profBeforeHeading:'How would you rate your German language proficiency prior to coming to Austria?', profNowHeading:'How would you rate your German language proficiency now?',
+      q3Badge1:'Questionnaire step 3 of 8', q3Badge2:'Use and attitudes', q3Heading:'General language use and attitudes', expatCommunityLabel:'Are you actively engaged in a British expatriate community in Austria?', expatSinceYearLabel:'If yes: since what year?', backToUKLabel:'Have you ever been back to the UK since leaving for Austria?', ukStayDurationLabel:'If yes: average duration of your stay(s) in the UK',
+      q4Badge1:'Questionnaire step 4 of 8', q4Badge2:'Household', q4Heading:'Household and children', hhSpeakLabel:'What languages do the people in your household speak?', hhSpeakEnglishText:'English', hhSpeakGermanText:'German', hhSpeakOtherText:'Other', hhEnglishVarietyLabel:'If they speak English, which variety?', hhGermanVarietyLabel:'If they speak German, which variety?', hhOtherSpeakLabel:'If other, please indicate', hhYouToThemLabel:'What language do you mostly use when speaking to members of your household?', hhYouToThemOtherLabel:'If other, please indicate', hhYouToThemGermanVarietyLabel:'If you use German, which variety?', hhThemToYouLabel:'What language do people in your household mostly use when talking to you?', hhThemToYouOtherLabel:'If other, please indicate', hhThemToYouEnglishVarietyLabel:'If English, which variety?', hhThemToYouGermanVarietyLabel:'If German, which variety?', hasChildrenLabel:'Do you have children?', childEnglishNamesLabel:'Do they have English names?', childGermanNamesLabel:'Do they have German names?', childOtherNamesLabel:'Do they have other names?', childOtherNamesTextLabel:'If yes, please indicate',
+      q5Badge1:'Questionnaire step 5 of 8', q5Badge2:'UK contact', q5Heading:'Contact with relatives and friends in the UK', ukContactFreqLabel:'How frequently do you contact your relatives and friends in the UK?', ukContactLanguageLabel:'What language do you mostly use to keep in touch with relatives and friends in the UK?', ukContactLanguageOtherLabel:'If other, please indicate', ukContactMethodLabel:'How do you primarily keep in touch with those relatives and friends in the UK?', ukContactMethodPlaceholder:'e.g. phone, WhatsApp, video call, email',
+      q6Badge1:'Questionnaire step 6 of 8', q6Badge2:'Domains', q6Heading:'Language use in different domains', germanDomainsHeading:'To what extent do you use German in the following domains?', englishDomainsHeading:'To what extent do you use English in the following domains?',
+      q7Badge1:'Questionnaire step 7 of 8', q7Badge2:'Media and plans', q7Heading:'Media consumption and future orientation', watchBritishTVLabel:'Do you ever watch British television programmes?', listenBritishRadioLabel:'Do you ever listen to British radio programmes or podcasts?', readBritishMediaLabel:'Do you ever read British newspapers, books or magazines?', listenAustrianRadioLabel:'Do you ever listen to Austrian radio programmes or podcasts?',
+      q8Badge1:'Questionnaire step 8 of 8', q8Badge2:'English change', q8Heading:'Comments on English and self-perceived change', othersCommentEnglishLabel:'Do your friends and family comment on your English?', englishChangedLabel:'Would you say that your English has changed?', finalCommentLabel:'Is there anything you would like to add?', finishQuestionnaire:'Finish questionnaire',
+      commentAccentText:'Accent', commentSoundsText:'Sounds', commentWordsText:'Words', commentWordOrderText:'Word order', commentPitchText:'Pitch', commentGrammarText:'Grammar', changedAccentText:'Accent', changedSoundsText:'Sounds', changedWordsText:'Words', changedWordOrderText:'Word order', changedPitchText:'Pitch', changedGrammarText:'Grammar',
+      taskSelectHeading:'Choose a task', taskSelectIntro:'You can complete the two tasks in any order.', taskACardTitle:'Task A — English rhyming', taskACardDesc:'Say three English rhyming words and then read the sentence.', taskBCardTitle:'Task B — German rhyming', taskBCardDesc:'Say three German rhyming words and then read the sentence.', btnPickA:'Start Task A', btnPickB:'Start Task B', taskSelectFootnote:'You can return here after finishing one task.',
+      instrButton:'I understand — continue', backToTasks:'Back',
+      micHeading:'Microphone setup', micIntro:'Click Enable microphone and allow access in your browser. Then complete a short test recording before you begin.', micSelLabel:'Microphone device', micSelPlaceholder:'Enable microphone to list devices…', btnRefreshMics:'Refresh', micHelp:'If your recordings are silent, select a different device and redo the test.', btnInit:'Enable microphone', btnBeginTask:'Begin task', btnBackToTask:'Back to task', micStatusNotStarted:'Microphone: not started', levelIdle:'Level: —', testTitle:'Test recording', testIntro:'Press Start test, wait one second, read the sentence, wait one second, then press Stop test. Test recordings are not saved.', testPrompt:'Please say: “The North Wind and the Sun were disputing which was the stronger.”', btnTestStart:'Start test', btnTestStop:'Stop test', btnTestPlay:'Play back', btnTestRedo:'Redo', testStatusIdle:'Not recorded', micFootnote:'Use Chrome or Edge for best results. Microphone access is required.',
+      primeLabel:'Say these three words aloud first:', runGroupTaskB:'Record the 3 words and then the sentence (in one recording):', runGroupTaskA:'Read the sentence aloud:', runHintTaskB:'Press <strong>Start recording</strong>. <strong>Say the three words above and then the sentence.</strong> Press <strong>Stop</strong>, then <strong>Accept &amp; save</strong>.', runHintTaskA:'Press <strong>Start recording</strong>, read the sentence once, press <strong>Stop</strong>, then <strong>Accept &amp; save</strong>.', btnStartRec:'Start recording', btnStopRec:'Stop', btnAccept:'Accept & save', btnNext:'Next ▶', btnGoMic:'Microphone setup', runStatusIdle:'Ready',
+      doneHeading:'Task complete ✓', btnBackToTasksDone:'Back to task selection', doneFootnote:'If any upload failed, the files were saved as local downloads instead.',
+      overlayUploadTitle:'Uploading… please wait', overlayUploadMsg:'Do not close this tab.', overlayQuestionnaireTitle:'Submitting questionnaire…', overlayQuestionnaireMsg:'Please wait. Do not close this tab.', overlaySessionTitle:'Uploading session log…', overlaySessionMsg:'Please wait.',
+      confirmDecline:'You chose not to participate. This page will now close.',
+      errors:{ needConsent:'Please tick the consent box to continue.', needState:'Please select your Bundesland.', needCity:'Please enter your city.', needPid:'Please enter the participant ID.', needBirth:'Please enter the year of birth.', needArrival:'Please enter the year of arrival in Austria.', needLivedAbroad:'Please answer whether you lived in another country for more than 6 months.', needPrePrimary:'Please select at least one language acquired before primary school.', needGermanBefore:'Please answer whether you attended German classes before coming to Austria.', needGermanAustria:'Please answer whether you attended German classes in Austria.', questionnaireFail:'The questionnaire could not be submitted. Please try again.', completeQuestionnaireFirst:'Please complete the questionnaire first.', taskNotFound:'Task not found.', micFirst:'Please click "Enable microphone" first.', completeTestFirst:'Please complete the test recording first.', stopTestFirst:'Please stop the test recording first.', stopRecordingFirst:'Please stop the recording first.', noAudioTest:'No audio detected in the test. Please select a different microphone device and try again.', noAudioRecording:'No audio detected in this recording. Please check your microphone and record again.', recordFirst:'Please record the sentence first.', noAudioSave:'This recording appears to contain no audio. Please record again.', micSwitchFail:'Switching microphone failed. Please try a different device or reload the page.', micInitFail:'Microphone initialisation failed. Please reload the page and allow microphone permissions.' },
+      taskNames: { A:'Task A — English rhyming', B:'Task B — German rhyming' },
+      taskInstructions: {
+        A:`<p><strong>Task A:</strong> For each item:</p><ul><li>You will see <strong>three English words</strong>.</li><li>These three words <strong>rhyme with the target word in the sentence</strong>.</li><li>Press <strong>Start recording</strong>.</li><li><strong>In the same recording</strong>, first say the <strong>three words</strong>, then read the <strong>sentence</strong> aloud.</li><li><strong>Example:</strong> <em>need – seed – feed</em> → <strong>Say heed again.</strong></li><li>Press <strong>Stop</strong> → <strong>Accept &amp; save</strong>.</li></ul>`,
+        B:`<p><strong>Task B:</strong> For each item:</p><ul><li>You will see <strong>three German words</strong>.</li><li>These three words <strong>rhyme with the missing word in the sentence</strong>. The sentence shows <strong>H__t</strong> as a clue.</li><li>Press <strong>Start recording</strong>.</li><li><strong>In the same recording</strong>, first say the <strong>three words</strong>, and then read the <strong>sentence</strong> aloud.</li><li>The missing word may be a <strong>nonsense word</strong>. Please say it as shown and do not “correct” it.</li><li><strong>Example:</strong> <em>Lied – sieht – zieht</em> → <strong>Er hat hiet gesagt.</strong></li><li>Press <strong>Stop</strong> → <strong>Accept &amp; save</strong>.</li></ul>`
+      },
+      sexOptions:['Female','Male','Other / prefer not to say'], germanVarieties:['Please select…','Standard German German','Standard Austrian German'], englishVarietyOptions:['Please select…','UK','USA','AUS','IE','Other'], hhLanguageOptions:['Please select…','English','German','Other'], ukContactLanguageOptions:['Please select…','German','English','Other'], ukFreqOptions:['Never','Sometimes','Often','Very often'],
+      profLabels:[['pronunciation','Pronunciation'],['oral_comprehension','Oral comprehension'],['writing','Writing'],['fluency','Fluency'],['reading','Reading']],
+      generalScales:[['speakGermanOften','How often do you speak German?',['1 = very little','5 = very often']],['maintainEnglish','Do you consider it important to maintain your English?',['1 = not important','5 = very important']],['passNativeLanguage','Would you consider it important to pass on your native language to the next generation?',['1 = not important','5 = very important']],['friendsGermanEnglish','In general, do you have more German- or English-speaking friends in Austria?',['1 = more English','5 = more German']],['homeCulture','Do you feel more at home with Austrian or with British culture?',['1 = more British','5 = more Austrian']]],
+      domainItems:[['household','With household members'],['relatives_outside','With relatives outside of the household'],['friends_outside','With friends outside of the household'],['neighbours','With neighbours'],['work','At work'],['school_uni','At school / university'],['public_services','For public services'],['shops_services','In shops or when contracting services'],['leisure','For leisure activities']],
+      mediaScales:[['moreLessEnglish','Do you think you use more or less English since you moved to Austria?',['1 = less English','5 = more English']],['futureAustriaUK','Would you like to move back to the UK or stay in Austria in the future?',['1 = UK','5 = Austria']]]
+    },
+    de: {
+      htmlLang: 'de', title: 'Sprachaufnahme-Tool', siteTitle: 'Sprachaufnahme',
+      groupTitleMain: 'Willkommen', groupIntro: 'Bitte wählen Sie aus, zu welcher Gruppe Sie gehören.',
+      groupDELabel: 'Deutsch ist meine Muttersprache', groupDESub: 'Ich bin österreichische:r Deutsch-Muttersprachler:in',
+      groupENLabel: 'English is my first language', groupENSub: 'Ich bin englische:r Muttersprachler:in',
+      consentHeading: 'Teilnehmerinformation & Einwilligung',
+      consentBox: `
+        <p><strong>Vielen Dank für Ihre Teilnahme!</strong><br>Bitte lesen Sie die folgenden Informationen sorgfältig durch, bevor Sie beginnen.</p>
+        <p><strong>Worum es in der Studie geht:</strong> Diese Aufnahmestudie ist Teil laufender Forschung an der Universität Graz zur phonetischen Sprachattrition. Ihre Aufnahmen helfen uns zu verstehen, wie sich die Aussprache der Erstsprache durch langfristigen Kontakt mit einer Zweitsprache verändern kann.</p>
+        <p><strong>Was Sie tun werden:</strong> Sie beantworten einen kurzen Hintergrundfragebogen und nehmen kurze Sprachstimuli auf. Die gesamte Sitzung dauert ungefähr 20 Minuten.</p>
+        <p><strong>Bevor Sie beginnen:</strong></p>
+        <ul>
+          <li>Bitte verwenden Sie einen Laptop oder Desktop-Computer, kein Smartphone oder Tablet.</li>
+          <li>Suchen Sie sich einen ruhigen Raum und schalten Sie Benachrichtigungen stumm.</li>
+          <li>Sitzen Sie etwa 30–50 cm vom Mikrofon entfernt und sprechen Sie deutlich bei normaler Lautstärke.</li>
+          <li>Für jede Aufnahme: Klicken Sie auf <strong>Aufnahme starten</strong>, warten Sie eine Sekunde, sprechen Sie, warten Sie eine Sekunde und klicken Sie dann auf <strong>Stopp</strong>.</li>
+        </ul>
+        <p><strong>Mikrofonberechtigung:</strong> Ihr Browser fragt nach Mikrofonzugriff. Bitte klicken Sie auf <strong>Zulassen</strong>. Sie können vorab eine Testaufnahme machen. Testaufnahmen werden nicht gespeichert.</p>
+        <p><strong>Daten:</strong> Audioaufnahmen und Antworten aus dem Fragebogen werden sicher gespeichert und nur für Forschungszwecke verwendet. Die Daten werden für Publikationen anonymisiert.</p>
+        <p><strong>Freiwilligkeit:</strong> Die Teilnahme ist freiwillig. Sie können jederzeit vor dem Absenden abbrechen.</p>
+      `,
+      scrollHintText: 'Im Feld nach unten scrollen, um alle Informationen zu lesen ↓', stateSelLabel: 'Bundesland (Österreich)', citySelLabel: 'Stadt / Ort', cityPlaceholder: 'z. B. Graz', consentCheckText: 'Ich habe die Informationen gelesen und stimme der Teilnahme zu.', btnConsent: 'Zustimmen und weiter', btnDecline: 'Ablehnen', consentFootnote: 'Bitte füllen Sie die Ortsangaben aus und setzen Sie das Häkchen, um fortzufahren.', yes:'Ja', no:'Nein', other:'Andere', pleaseSelect:'Bitte auswählen…', continue:'Weiter', back:'Zurück',
+      q1Badge1:'Fragebogen Schritt 1 von 8', q1Badge2:'Hintergrund', q1Heading:'Grundlegende Angaben', pidLabel:'Teilnehmer-ID', pidPlaceholder:'Bitte geben Sie hier Ihre Teilnehmer-ID ein', birthYearLabel:'Geburtsjahr', arrivalYearLabel:'Wann sind Sie nach Österreich gekommen (Jahr)?', householdCountLabel:'Wie viele Personen leben außer Ihnen in Ihrem Haushalt?', derivedAgeLabel:'Alter', derivedAgeMigrationLabel:'Alter bei Migration', derivedDurationLabel:'Dauer des Aufenthalts in Österreich', livedAbroadLabel:'Haben Sie außer in Österreich jemals länger als 6 Monate in einem anderen Land als dem Vereinigten Königreich gelebt?', abroadYearsLabel:'Falls ja: Anzahl der Jahre', abroadCountryLabel:'Falls ja: Land', abroadFromLabel:'Von Jahr', abroadToLabel:'Bis Jahr', prePrimaryLabel:'Welche Sprache(n) haben Sie vor dem Beginn der Volksschule erworben?', prePrimaryEnglish:'Englisch', prePrimaryGerman:'Deutsch', prePrimaryOtherChkText:'Andere', prePrimaryOtherLabel:'Falls andere, welche Sprache(n)?',
+      q2Badge1:'Fragebogen Schritt 2 von 8', q2Badge2:'Deutschlernen', q2Heading:'Hintergrund zum Deutschlernen', germanBeforeLabel:'Haben Sie vor Ihrer Ankunft in Österreich Deutschunterricht besucht?', germanBeforeVarietyLabel:'Welche Deutschvarietät wurde unterrichtet?', germanBeforeLastYearLabel:'Wann (Jahr) haben Sie zuletzt diesen Unterricht besucht?', germanAustriaLabel:'Haben Sie in Österreich Deutschunterricht besucht?', germanAustriaVarietyLabel:'Welche Deutschvarietät wurde unterrichtet?', germanAustriaLastYearLabel:'Wann (Jahr) haben Sie zuletzt diesen Unterricht besucht?', profBeforeHeading:'Wie würden Sie Ihre Deutschkenntnisse vor Ihrer Ankunft in Österreich einschätzen?', profNowHeading:'Wie würden Sie Ihre Deutschkenntnisse jetzt einschätzen?',
+      q3Badge1:'Fragebogen Schritt 3 von 8', q3Badge2:'Gebrauch und Einstellungen', q3Heading:'Allgemeiner Sprachgebrauch und Einstellungen', expatCommunityLabel:'Sind Sie aktiv in einer britischen Expat-Community in Österreich eingebunden?', expatSinceYearLabel:'Falls ja: seit welchem Jahr?', backToUKLabel:'Waren Sie seit Ihrem Umzug nach Österreich wieder im Vereinigten Königreich?', ukStayDurationLabel:'Falls ja: durchschnittliche Dauer Ihrer Aufenthalte im Vereinigten Königreich',
+      q4Badge1:'Fragebogen Schritt 4 von 8', q4Badge2:'Haushalt', q4Heading:'Haushalt und Kinder', hhSpeakLabel:'Welche Sprachen sprechen die Personen in Ihrem Haushalt?', hhSpeakEnglishText:'Englisch', hhSpeakGermanText:'Deutsch', hhSpeakOtherText:'Andere', hhEnglishVarietyLabel:'Falls Englisch gesprochen wird: welche Varietät?', hhGermanVarietyLabel:'Falls Deutsch gesprochen wird: welche Varietät?', hhOtherSpeakLabel:'Falls andere, bitte angeben', hhYouToThemLabel:'Welche Sprache verwenden Sie meistens, wenn Sie mit Personen in Ihrem Haushalt sprechen?', hhYouToThemOtherLabel:'Falls andere, bitte angeben', hhYouToThemGermanVarietyLabel:'Falls Sie Deutsch verwenden: welche Varietät?', hhThemToYouLabel:'Welche Sprache verwenden die Personen in Ihrem Haushalt meistens, wenn sie mit Ihnen sprechen?', hhThemToYouOtherLabel:'Falls andere, bitte angeben', hhThemToYouEnglishVarietyLabel:'Falls Englisch: welche Varietät?', hhThemToYouGermanVarietyLabel:'Falls Deutsch: welche Varietät?', hasChildrenLabel:'Haben Sie Kinder?', childEnglishNamesLabel:'Haben sie englische Namen?', childGermanNamesLabel:'Haben sie deutsche Namen?', childOtherNamesLabel:'Haben sie andere Namen?', childOtherNamesTextLabel:'Falls ja, bitte angeben',
+      q5Badge1:'Fragebogen Schritt 5 von 8', q5Badge2:'Kontakt ins Vereinigte Königreich', q5Heading:'Kontakt mit Verwandten und Freund:innen im Vereinigten Königreich', ukContactFreqLabel:'Wie häufig haben Sie Kontakt mit Ihren Verwandten und Freund:innen im Vereinigten Königreich?', ukContactLanguageLabel:'Welche Sprache verwenden Sie meistens, um mit Verwandten und Freund:innen im Vereinigten Königreich in Kontakt zu bleiben?', ukContactLanguageOtherLabel:'Falls andere, bitte angeben', ukContactMethodLabel:'Wie halten Sie hauptsächlich Kontakt mit diesen Verwandten und Freund:innen?', ukContactMethodPlaceholder:'z. B. Telefon, WhatsApp, Videoanruf, E-Mail',
+      q6Badge1:'Fragebogen Schritt 6 von 8', q6Badge2:'Lebensbereiche', q6Heading:'Sprachgebrauch in verschiedenen Lebensbereichen', germanDomainsHeading:'In welchem Ausmaß verwenden Sie Deutsch in den folgenden Lebensbereichen?', englishDomainsHeading:'In welchem Ausmaß verwenden Sie Englisch in den folgenden Lebensbereichen?',
+      q7Badge1:'Fragebogen Schritt 7 von 8', q7Badge2:'Medien und Zukunft', q7Heading:'Medienkonsum und Zukunftsorientierung', watchBritishTVLabel:'Schauen Sie britische Fernsehprogramme?', listenBritishRadioLabel:'Hören Sie britische Radiosendungen oder Podcasts?', readBritishMediaLabel:'Lesen Sie britische Zeitungen, Bücher oder Magazine?', listenAustrianRadioLabel:'Hören Sie österreichische Radiosendungen oder Podcasts?',
+      q8Badge1:'Fragebogen Schritt 8 von 8', q8Badge2:'Veränderungen im Englischen', q8Heading:'Kommentare zu Ihrem Englisch und selbst wahrgenommene Veränderungen', othersCommentEnglishLabel:'Kommentieren Freund:innen oder Familienmitglieder Ihr Englisch?', englishChangedLabel:'Würden Sie sagen, dass sich Ihr Englisch verändert hat?', finalCommentLabel:'Möchten Sie noch etwas hinzufügen?', finishQuestionnaire:'Fragebogen abschließen', commentAccentText:'Akzent', commentSoundsText:'Laute', commentWordsText:'Wortschatz', commentWordOrderText:'Wortstellung', commentPitchText:'Tonhöhe', commentGrammarText:'Grammatik', changedAccentText:'Akzent', changedSoundsText:'Laute', changedWordsText:'Wortschatz', changedWordOrderText:'Wortstellung', changedPitchText:'Tonhöhe', changedGrammarText:'Grammatik',
+      taskSelectHeading:'Aufgabe auswählen', taskSelectIntro:'Sie können die beiden Aufgaben in beliebiger Reihenfolge bearbeiten.', taskACardTitle:'Aufgabe A — Englisches Reimen', taskACardDesc:'Sprechen Sie drei englische Reimwörter und lesen Sie dann den Satz.', taskBCardTitle:'Aufgabe B — Deutsches Reimen', taskBCardDesc:'Sprechen Sie drei deutsche Reimwörter und lesen Sie dann den Satz.', btnPickA:'Aufgabe A starten', btnPickB:'Aufgabe B starten', taskSelectFootnote:'Nach Abschluss einer Aufgabe können Sie hierher zurückkehren.', instrButton:'Verstanden — weiter', backToTasks:'Zurück',
+      micHeading:'Mikrofon einrichten', micIntro:'Klicken Sie auf Mikrofon aktivieren und erlauben Sie den Zugriff im Browser. Führen Sie danach eine kurze Testaufnahme durch.', micSelLabel:'Mikrofongerät', micSelPlaceholder:'Mikrofon aktivieren, um Geräte aufzulisten…', btnRefreshMics:'Aktualisieren', micHelp:'Wenn Ihre Aufnahmen stumm sind, wählen Sie ein anderes Gerät und wiederholen Sie den Test.', btnInit:'Mikrofon aktivieren', btnBeginTask:'Aufgabe beginnen', btnBackToTask:'Zurück zur Aufgabe', micStatusNotStarted:'Mikrofon: nicht gestartet', levelIdle:'Pegel: —', testTitle:'Testaufnahme', testIntro:'Drücken Sie Test starten, warten Sie eine Sekunde, lesen Sie den Satz, warten Sie eine Sekunde und drücken Sie dann Test stoppen. Testaufnahmen werden nicht gespeichert.', testPrompt:'Bitte sagen Sie: „Der Nordwind und die Sonne stritten sich, wer von ihnen beiden wohl der Stärkere wäre.“', btnTestStart:'Test starten', btnTestStop:'Test stoppen', btnTestPlay:'Abspielen', btnTestRedo:'Wiederholen', testStatusIdle:'Nicht aufgenommen', micFootnote:'Für beste Ergebnisse verwenden Sie Chrome oder Edge. Der Mikrofonzugriff ist erforderlich.',
+      primeLabel:'Sprechen Sie zuerst diese drei Wörter laut aus:', runGroupTaskB:'Nehmen Sie die 3 Wörter und dann den Satz auf (in einer Aufnahme):', runGroupTaskA:'Lesen Sie den Satz laut vor:', runHintTaskB:'Drücken Sie <strong>Aufnahme starten</strong>. <strong>Sprechen Sie die drei Wörter oben und dann den Satz.</strong> Drücken Sie <strong>Stopp</strong>, dann <strong>Akzeptieren &amp; speichern</strong>.', runHintTaskA:'Drücken Sie <strong>Aufnahme starten</strong>, lesen Sie den Satz einmal vor, drücken Sie <strong>Stopp</strong>, dann <strong>Akzeptieren &amp; speichern</strong>.', btnStartRec:'Aufnahme starten', btnStopRec:'Stopp', btnAccept:'Akzeptieren & speichern', btnNext:'Weiter ▶', btnGoMic:'Mikrofon einrichten', runStatusIdle:'Bereit',
+      doneHeading:'Aufgabe abgeschlossen ✓', btnBackToTasksDone:'Zurück zur Aufgabenauswahl', doneFootnote:'Falls ein Upload fehlgeschlagen ist, wurden die Dateien als lokale Downloads gespeichert.', overlayUploadTitle:'Hochladen… bitte warten', overlayUploadMsg:'Schließen Sie diesen Tab nicht.', overlayQuestionnaireTitle:'Fragebogen wird gesendet…', overlayQuestionnaireMsg:'Bitte warten. Schließen Sie diesen Tab nicht.', overlaySessionTitle:'Sitzungsprotokoll wird hochgeladen…', overlaySessionMsg:'Bitte warten.', confirmDecline:'Sie haben sich gegen eine Teilnahme entschieden. Diese Seite wird nun geschlossen.',
+      errors:{ needConsent:'Bitte setzen Sie das Einwilligungshäkchen, um fortzufahren.', needState:'Bitte wählen Sie Ihr Bundesland.', needCity:'Bitte geben Sie Ihren Ort an.', needPid:'Bitte geben Sie die Teilnehmer-ID ein.', needBirth:'Bitte geben Sie das Geburtsjahr ein.', needArrival:'Bitte geben Sie das Jahr Ihrer Ankunft in Österreich ein.', needLivedAbroad:'Bitte beantworten Sie, ob Sie länger als 6 Monate in einem anderen Land gelebt haben.', needPrePrimary:'Bitte wählen Sie mindestens eine vor der Volksschule erworbene Sprache aus.', needGermanBefore:'Bitte beantworten Sie, ob Sie vor Ihrer Ankunft Deutschunterricht besucht haben.', needGermanAustria:'Bitte beantworten Sie, ob Sie in Österreich Deutschunterricht besucht haben.', questionnaireFail:'Der Fragebogen konnte nicht übermittelt werden. Bitte versuchen Sie es erneut.', completeQuestionnaireFirst:'Bitte füllen Sie zuerst den Fragebogen aus.', taskNotFound:'Aufgabe nicht gefunden.', micFirst:'Bitte klicken Sie zuerst auf „Mikrofon aktivieren“.', completeTestFirst:'Bitte führen Sie zuerst die Testaufnahme durch.', stopTestFirst:'Bitte stoppen Sie zuerst die Testaufnahme.', stopRecordingFirst:'Bitte stoppen Sie zuerst die Aufnahme.', noAudioTest:'In der Testaufnahme wurde kein Audio erkannt. Bitte wählen Sie ein anderes Mikrofon und versuchen Sie es erneut.', noAudioRecording:'In dieser Aufnahme wurde kein Audio erkannt. Bitte überprüfen Sie das Mikrofon und nehmen Sie erneut auf.', recordFirst:'Bitte nehmen Sie zuerst den Satz auf.', noAudioSave:'Diese Aufnahme scheint kein Audio zu enthalten. Bitte nehmen Sie erneut auf.', micSwitchFail:'Der Wechsel des Mikrofons ist fehlgeschlagen. Bitte versuchen Sie ein anderes Gerät oder laden Sie die Seite neu.', micInitFail:'Die Mikrofoninitialisierung ist fehlgeschlagen. Bitte laden Sie die Seite neu und erlauben Sie den Mikrofonzugriff.' },
+      taskNames:{ A:'Aufgabe A — Englisches Reimen', B:'Aufgabe B — Deutsches Reimen' },
+      taskInstructions:{
+        A:`<p><strong>Aufgabe A:</strong> Für jedes Item:</p><ul><li>Sie sehen <strong>drei englische Wörter</strong>.</li><li>Diese drei Wörter <strong>reimen sich mit dem Zielwort im Satz</strong>.</li><li>Drücken Sie <strong>Aufnahme starten</strong>.</li><li><strong>In derselben Aufnahme</strong> sprechen Sie zuerst die <strong>drei Wörter</strong> und lesen dann den <strong>Satz</strong> laut vor.</li><li><strong>Beispiel:</strong> <em>need – seed – feed</em> → <strong>Say heed again.</strong></li><li>Drücken Sie <strong>Stopp</strong> → <strong>Akzeptieren &amp; speichern</strong>.</li></ul>`,
+        B:`<p><strong>Aufgabe B:</strong> Für jedes Item:</p><ul><li>Sie sehen <strong>drei deutsche Wörter</strong>.</li><li>Diese drei Wörter <strong>reimen sich mit dem fehlenden Wort im Satz</strong>. Der Satz zeigt <strong>H__t</strong> als Hinweis.</li><li>Drücken Sie <strong>Aufnahme starten</strong>.</li><li><strong>In derselben Aufnahme</strong> sprechen Sie zuerst die <strong>drei Wörter</strong> und lesen dann den <strong>Satz</strong> laut vor.</li><li>Das fehlende Wort kann ein <strong>Kunstwort</strong> sein – das ist beabsichtigt. Bitte sprechen Sie es genau so aus, wie es angegeben ist.</li><li><strong>Beispiel:</strong> <em>Lied – sieht – zieht</em> → <strong>Er hat hiet gesagt.</strong></li><li>Drücken Sie <strong>Stopp</strong> → <strong>Akzeptieren &amp; speichern</strong>.</li></ul>`
+      },
+      sexOptions:['Weiblich','Männlich','Andere / keine Angabe'], germanVarieties:['Bitte auswählen…','Standarddeutsch (Deutschland)','Standardösterreichisches Deutsch'], englishVarietyOptions:['Bitte auswählen…','UK','USA','AUS','IE','Andere'], hhLanguageOptions:['Bitte auswählen…','Englisch','Deutsch','Andere'], ukContactLanguageOptions:['Bitte auswählen…','Deutsch','Englisch','Andere'], ukFreqOptions:['Nie','Manchmal','Oft','Sehr oft'],
+      profLabels:[['pronunciation','Aussprache'],['oral_comprehension','Mündliches Verstehen'],['writing','Schreiben'],['fluency','Flüssigkeit'],['reading','Lesen']],
+      generalScales:[['speakGermanOften','Wie oft sprechen Sie Deutsch?',['1 = sehr wenig','5 = sehr oft']],['maintainEnglish','Ist es Ihnen wichtig, Ihr Englisch zu erhalten?',['1 = nicht wichtig','5 = sehr wichtig']],['passNativeLanguage','Wäre es Ihnen wichtig, Ihre Erstsprache an die nächste Generation weiterzugeben?',['1 = nicht wichtig','5 = sehr wichtig']],['friendsGermanEnglish','Haben Sie in Österreich eher deutsch- oder englischsprachige Freund:innen?',['1 = eher englisch','5 = eher deutsch']],['homeCulture','Fühlen Sie sich eher mit österreichischer oder britischer Kultur verbunden?',['1 = eher britisch','5 = eher österreichisch']]],
+      domainItems:[['household','Mit Personen im Haushalt'],['relatives_outside','Mit Verwandten außerhalb des Haushalts'],['friends_outside','Mit Freund:innen außerhalb des Haushalts'],['neighbours','Mit Nachbar:innen'],['work','Bei der Arbeit'],['school_uni','In Schule / Universität'],['public_services','Bei Behörden / öffentlichen Stellen'],['shops_services','In Geschäften oder bei Dienstleistungen'],['leisure','In der Freizeit']],
+      mediaScales:[['moreLessEnglish','Verwenden Sie seit Ihrem Umzug nach Österreich mehr oder weniger Englisch?',['1 = weniger Englisch','5 = mehr Englisch']],['futureAustriaUK','Möchten Sie in Zukunft lieber ins Vereinigte Königreich zurückkehren oder in Österreich bleiben?',['1 = Vereinigtes Königreich','5 = Österreich']]]
+    }
+  };
+
+  const TASK_A_VOWELS = [
+    { key:"i_long",   targetToken:"heed",  primes:["need","seed","feed"] },
+    { key:"i_short",  targetToken:"hid",   primes:["kid","lid","bid"] },
+    { key:"e_short",  targetToken:"head",  primes:["bed","fed","led"] },
+    { key:"ae",       targetToken:"had",   primes:["bad","mad","sad"] },
+    { key:"a_short",  targetToken:"hud",   primes:["bud","mud","cud"] },
+    { key:"a_long",   targetToken:"hard",  primes:["card","lard","yard"] },
+    { key:"o_short",  targetToken:"hod",   primes:["cod","nod","pod"] },
+    { key:"o_long",   targetToken:"hoard", primes:["fraud","sawed","clawed"] },
+    { key:"u_short",  targetToken:"hood",  primes:["good","could","would"] },
+    { key:"u_long",   targetToken:"who'd", primes:["food","mood","dude"] },
+    { key:"er",       targetToken:"herd",  primes:["nerd","bird","third"] }
+  ];
+  const CARRIERS_A = { C1: "Say h__d again.", C2: "We said h__d together." };
+  const TASK_A_SEED = 1337;
+  const TASK_B_VOWELS = [
+    { key:"i_long",  targetToken:"hiet",  primes:["sieht","zieht","Lied"] },
+    { key:"i_short", targetToken:"hiti",  primes:["Bitt","Ritt","mit"] },
+    { key:"e_long",  targetToken:"heet",  primes:["geht","steht","weht"] },
+    { key:"e_short", targetToken:"het",   primes:["Bett","nett","fett"] },
+    { key:"a_long",  targetToken:"haht",  primes:["Rat","Tat","Bad"] },
+    { key:"a_short", targetToken:"hat",   primes:["matt","satt","glatt"] },
+    { key:"y_long",  targetToken:"hueht", primes:["müht","blüht","glüht"] },
+    { key:"y_short", targetToken:"hyt",   primes:["Bütt","Glück","Stück"] },
+    { key:"oe_long", targetToken:"hoeht", primes:["blöd","öd","löt"] },
+    { key:"oe_short",targetToken:"hoet",  primes:["höll","könn","gönn"] },
+    { key:"o_open",  targetToken:"hot",   primes:["Schrott","Gott","Spott"] },
+    { key:"o_long",  targetToken:"hoot",  primes:["Boot","Brot","Not"] },
+    { key:"u_long",  targetToken:"huht",  primes:["gut","Blut","Mut"] },
+    { key:"u_short", targetToken:"hut",   primes:["Schutt","Putt","Butt"] }
+  ];
+  const CARRIERS_B = { C1: "Er hat H__t gesagt.", C2: "Wir haben H__t gesagt." };
+  const TASK_B_SEED = 7331;
+
+  function mulberry32(seed){ let t = seed >>> 0; return function(){ t += 0x6D2B79F5; let r = Math.imul(t ^ (t >>> 15), 1 | t); r ^= r + Math.imul(r ^ (r >>> 7), 61 | r); return ((r ^ (r >>> 14)) >>> 0) / 4294967296; }; }
+  function shuffleInPlace(arr, rng){ for (let i=arr.length-1;i>0;i--){ const j = Math.floor(rng()*(i+1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+  function buildVowelItems(vowels, carriers, seed, taskId, lang){ const byKey = Object.create(null); for (const v of vowels) byKey[v.key]=v; const raw=[]; for (const v of vowels){ raw.push({vKey:v.key, cond:'C1'}); raw.push({vKey:v.key, cond:'C2'}); } const rng=mulberry32(seed); shuffleInPlace(raw, rng); for (let i=1;i<raw.length;i++){ if (raw[i].vKey===raw[i-1].vKey){ let j=i+1; while (j<raw.length && raw[j].vKey===raw[i].vKey) j++; if (j<raw.length) [raw[i],raw[j]]=[raw[j],raw[i]]; } } return raw.map(({vKey,cond})=>{ const v=byKey[vKey]; return { taskId, lang, condition:cond, targetToken:v.targetToken, primes:v.primes, promptText:carriers[cond] }; }); }
+  function sanitizeToken(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9']+/g,''); }
+
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const screens = { group:$('#scr-group'), consent:$('#scr-consent'), q1:$('#scr-quest-1'), q2:$('#scr-quest-2'), q3:$('#scr-quest-3'), q4:$('#scr-quest-4'), q5:$('#scr-quest-5'), q6:$('#scr-quest-6'), q7:$('#scr-quest-7'), q8:$('#scr-quest-8'), taskselect:$('#scr-taskselect'), instr:$('#scr-instr'), mic:$('#scr-mic'), run:$('#scr-run'), done:$('#scr-done') };
+  function show(el){ $$('.screen').forEach(x=>x.classList.remove('active')); el.classList.add('active'); window.scrollTo(0,0); }
+  function setText(id, val){ const el = typeof id==='string' ? document.getElementById(id) : id; if (el) el.textContent = val; }
+  function setHtml(id, val){ const el = typeof id==='string' ? document.getElementById(id) : id; if (el) el.innerHTML = val; }
+  function setPlaceholder(id, val){ const el = document.getElementById(id); if (el) el.placeholder = val; }
+  function toggleHidden(sel, showIt){ const el = typeof sel==='string' ? $(sel) : sel; if (el) el.classList.toggle('hidden', !showIt); }
+  function getRadio(name){ const el=document.querySelector(`input[name="${name}"]:checked`); return el ? el.value : ''; }
+  function valueOf(id){ const el=$(id); return el ? (el.value || '') : ''; }
+  function checked01(id){ const el=$(id); return el && el.checked ? '1' : '0'; }
+  function yesNo12FromCheckbox(id){ const el = $(id); return el && el.checked ? '1' : '2'; }
+  function randToken(len=10){ const a=new Uint8Array(len); const c=window.crypto; if (c && c.getRandomValues) c.getRandomValues(a); else for(let i=0;i<a.length;i++) a[i]=Math.floor(Math.random()*256); return Array.from(a,b=>(b%36).toString(36)).join(''); }
+  function isoSafeNow(){ const d=new Date(); const pad=(n,w=2)=>String(n).padStart(w,'0'); const ms=pad(d.getMilliseconds(),3); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}.${ms}`; }
+  function csvEscape(s){ const str=String(s ?? ''); if (/[",\n]/.test(str)) return `"${str.split('"').join('""')}"`; return str; }
+  function saveLocal(blob, filename){ const a=document.createElement('a'); const url=URL.createObjectURL(blob); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),2000); }
+
+  const sessionId = randToken(10);
+  const sessionStartIso = new Date().toISOString();
+  let participantGroup = null;
+  let uiLang = 'en';
+  let previewMode = new URLSearchParams(window.location.search).get('preview') === '1';
+  let consentGiven = false, consentTimeIso = '', consentUploaded = false, questionnaireUploaded = false;
+  let selectedTaskId = null, taskItems = [], itemIdx = 0, currentItem = null, returnToRunAfterMic = false;
+
+  function buildTasks(){
+    return {
+      A: { id:'A', langCode:'E', items: buildVowelItems(TASK_A_VOWELS, CARRIERS_A, TASK_A_SEED, 'A', 'E') },
+      B: { id:'B', langCode:'G', items: buildVowelItems(TASK_B_VOWELS, CARRIERS_B, TASK_B_SEED, 'B', 'G') }
+    };
+  }
+  let TASKS = buildTasks();
+
+  function fillSelect(selectId, items){ const el=$(selectId); if (!el) return; el.innerHTML=''; items.forEach((v, idx)=>{ const opt=document.createElement('option'); opt.value = idx===0 && /select/i.test(v) || /auswählen/i.test(v) ? '' : v; opt.textContent=v; if (idx===0) { opt.disabled=true; opt.selected=true; } el.appendChild(opt); }); }
+  function fillSimpleSelect(selectId, items){ const el=$(selectId); if (!el) return; el.innerHTML=''; items.forEach((v, idx)=>{ const opt=document.createElement('option'); opt.value = idx===0 ? '' : v; opt.textContent = v; if (idx===0) { opt.disabled=true; opt.selected=true; } el.appendChild(opt); }); }
+  function buildRadioScale(name, label, n, leftLabel, rightLabel){ const wrap=document.createElement('div'); wrap.className='q-card'; const q=document.createElement('div'); q.textContent=label; wrap.appendChild(q); const row=document.createElement('div'); row.className='choice-inline'; for(let i=1;i<=n;i++){ const lab=document.createElement('label'); lab.innerHTML = `<input type="radio" name="${name}" value="${i}"> ${i}`; row.appendChild(lab);} wrap.appendChild(row); const ends=document.createElement('div'); ends.className='row'; ends.style.justifyContent='space-between'; ends.innerHTML=`<span class="muted">${leftLabel}</span><span class="muted">${rightLabel}</span>`; wrap.appendChild(ends); return wrap; }
+  function rebuildGeneratedScales(){ const t=I18N[uiLang]; const profBeforeWrap=$('#profBeforeWrap'), profNowWrap=$('#profNowWrap'), generalWrap=$('#generalScalesWrap'), germanWrap=$('#germanDomainsWrap'), englishWrap=$('#englishDomainsWrap'), mediaWrap=$('#mediaScalesWrap'); [profBeforeWrap, profNowWrap, generalWrap, germanWrap, englishWrap, mediaWrap].forEach(el=>{ if (el) el.innerHTML=''; }); t.profLabels.forEach(([key,label])=>{ profBeforeWrap.appendChild(buildRadioScale(`prof_before_${key}`, label, 10, uiLang==='de' ? '1 = sehr niedrig' : '1 = very low', uiLang==='de' ? '10 = sehr hoch' : '10 = very high')); profNowWrap.appendChild(buildRadioScale(`prof_now_${key}`, label, 10, uiLang==='de' ? '1 = sehr niedrig' : '1 = very low', uiLang==='de' ? '10 = sehr hoch' : '10 = very high')); }); t.generalScales.forEach(([key,label,ends])=> generalWrap.appendChild(buildRadioScale(key,label,5,ends[0],ends[1]))); t.domainItems.forEach(([key,label])=>{ germanWrap.appendChild(buildRadioScale(`german_domain_${key}`, label, 5, uiLang==='de' ? '1 = sehr wenig' : '1 = very little', uiLang==='de' ? '5 = sehr oft' : '5 = very often')); englishWrap.appendChild(buildRadioScale(`english_domain_${key}`, label, 5, uiLang==='de' ? '1 = sehr wenig' : '1 = very little', uiLang==='de' ? '5 = sehr oft' : '5 = very often')); }); mediaWrap.innerHTML=''; t.mediaScales.forEach(([key,label,ends])=> mediaWrap.appendChild(buildRadioScale(key,label,5,ends[0],ends[1])));
+    const ukWrap=$('#ukContactFreqWrap'); ukWrap.innerHTML=''; t.ukFreqOptions.forEach((lbl, idx)=>{ const vals=['0','33','66','100']; const lab=document.createElement('label'); lab.innerHTML=`<input type="radio" name="ukContactFreq" value="${vals[idx]}"> ${lbl}`; ukWrap.appendChild(lab); });
+  }
+  function populateStaticText(){ const t=I18N[uiLang]; document.documentElement.lang=t.htmlLang; document.title=t.title; setText('siteTitle', t.siteTitle); setText('groupTitleMain', t.groupTitleMain); setText('groupIntro', t.groupIntro); setText('groupDELabel', t.groupDELabel); setText('groupDESub', t.groupDESub); setText('groupENLabel', t.groupENLabel); setText('groupENSub', t.groupENSub); setText('consentHeading', t.consentHeading); setHtml('consentBox', t.consentBox); setText('scrollHintText', t.scrollHintText); setText('stateSelLabel', t.stateSelLabel); setText('citySelLabel', t.citySelLabel); setPlaceholder('citySel', t.cityPlaceholder); setText('consentCheckText', t.consentCheckText); setText('btnConsent', t.btnConsent); setText('btnDecline', t.btnDecline); setText('consentFootnote', t.consentFootnote);
+    ['q1Badge1','q1Badge2','q1Heading','pidLabel','birthYearLabel','arrivalYearLabel','householdCountLabel','derivedAgeLabel','derivedAgeMigrationLabel','derivedDurationLabel','livedAbroadLabel','abroadYearsLabel','abroadCountryLabel','abroadFromLabel','abroadToLabel','prePrimaryLabel','prePrimaryEnglish','prePrimaryGerman','prePrimaryOtherChkText','prePrimaryOtherLabel','q2Badge1','q2Badge2','q2Heading','germanBeforeLabel','germanBeforeVarietyLabel','germanBeforeLastYearLabel','germanAustriaLabel','germanAustriaVarietyLabel','germanAustriaLastYearLabel','profBeforeHeading','profNowHeading','q3Badge1','q3Badge2','q3Heading','expatCommunityLabel','expatSinceYearLabel','backToUKLabel','ukStayDurationLabel','q4Badge1','q4Badge2','q4Heading','hhSpeakLabel','hhSpeakEnglishText','hhSpeakGermanText','hhSpeakOtherText','hhEnglishVarietyLabel','hhGermanVarietyLabel','hhOtherSpeakLabel','hhYouToThemLabel','hhYouToThemOtherLabel','hhYouToThemGermanVarietyLabel','hhThemToYouLabel','hhThemToYouOtherLabel','hhThemToYouEnglishVarietyLabel','hhThemToYouGermanVarietyLabel','hasChildrenLabel','childEnglishNamesLabel','childGermanNamesLabel','childOtherNamesLabel','childOtherNamesTextLabel','q5Badge1','q5Badge2','q5Heading','ukContactFreqLabel','ukContactLanguageLabel','ukContactLanguageOtherLabel','ukContactMethodLabel','q6Badge1','q6Badge2','q6Heading','germanDomainsHeading','englishDomainsHeading','q7Badge1','q7Badge2','q7Heading','watchBritishTVLabel','listenBritishRadioLabel','readBritishMediaLabel','listenAustrianRadioLabel','q8Badge1','q8Badge2','q8Heading','othersCommentEnglishLabel','englishChangedLabel','finalCommentLabel','commentAccentText','commentSoundsText','commentWordsText','commentWordOrderText','commentPitchText','commentGrammarText','changedAccentText','changedSoundsText','changedWordsText','changedWordOrderText','changedPitchText','changedGrammarText','taskSelectHeading','taskSelectIntro','taskACardTitle','taskACardDesc','taskBCardTitle','taskBCardDesc','taskSelectFootnote','micHeading','micIntro','micSelLabel','micHelp','testTitle','testPrompt','micFootnote','primeLabel','doneHeading','doneFootnote'].forEach(id=> setText(id, t[id]));
+    setText('btnQ1Next', t.continue); setText('btnQ2Back', t.back); setText('btnQ2Next', t.continue); setText('btnQ3Back', t.back); setText('btnQ3Next', t.continue); setText('btnQ4Back', t.back); setText('btnQ4Next', t.continue); setText('btnQ5Back', t.back); setText('btnQ5Next', t.continue); setText('btnQ6Back', t.back); setText('btnQ6Next', t.continue); setText('btnQ7Back', t.back); setText('btnQ7Next', t.continue); setText('btnQ8Back', t.back); setText('btnQuestionnaireDone', t.finishQuestionnaire); setText('btnPickA', t.btnPickA); setText('btnPickB', t.btnPickB); setText('btnInstrOk', t.instrButton); setText('btnBackToTasks2', t.backToTasks); setText('btnRefreshMics', t.btnRefreshMics); setText('btnInit', t.btnInit); setText('btnBeginTask', t.btnBeginTask); setText('btnBackToTask', t.btnBackToTask); setText('status', t.micStatusNotStarted); setText('level', t.levelIdle); setText('testIntro', t.testIntro); setText('btnTestStart', t.btnTestStart); setText('btnTestStop', t.btnTestStop); setText('btnTestPlay', t.btnTestPlay); setText('btnTestRedo', t.btnTestRedo); setText('testStatus', t.testStatusIdle); setText('btnStartRec', t.btnStartRec); setText('btnStopRec', t.btnStopRec); setText('btnAccept', t.btnAccept); setText('btnNext', t.btnNext); setText('btnGoMic', t.btnGoMic); setText('runStatus', t.runStatusIdle); setText('btnBackToTasksDone', t.btnBackToTasksDone); setText('instrTitle', selectedTaskId ? t.taskNames[selectedTaskId] : '');
+    setPlaceholder('pid', t.pidPlaceholder); setPlaceholder('ukContactMethod', t.ukContactMethodPlaceholder);
+    fillSimpleSelect('stateSel', [t.pleaseSelect, ...STATE_OPTIONS]); fillSimpleSelect('germanBeforeVariety', t.germanVarieties); fillSimpleSelect('germanAustriaVariety', t.germanVarieties); fillSimpleSelect('hhEnglishVariety', t.englishVarietyOptions); fillSimpleSelect('hhYouToThem', t.hhLanguageOptions); fillSimpleSelect('hhThemToYou', t.hhLanguageOptions); fillSimpleSelect('ukContactLanguage', t.ukContactLanguageOptions);
+    $$('.txt-yes').forEach(el=> el.textContent=t.yes); $$('.txt-no').forEach(el=> el.textContent=t.no);
+    rebuildGeneratedScales();
+  }
+  function setLanguage(lang){ uiLang = lang; populateStaticText(); updatePreviewUI(); if (previewMode) ensurePreviewDefaults(); }
+
+  function computeDerived(){ const currentYear = new Date().getFullYear(); const birth=parseInt($('#birthYear').value,10); const arrival=parseInt($('#arrivalYear').value,10); $('#derivedAge').value = Number.isFinite(birth) ? String(currentYear-birth) : ''; $('#derivedAgeMigration').value = (Number.isFinite(birth) && Number.isFinite(arrival)) ? String(arrival-birth) : ''; $('#derivedDuration').value = Number.isFinite(arrival) ? String(currentYear-arrival) : ''; }
+  $('#birthYear').addEventListener('input', computeDerived); $('#arrivalYear').addEventListener('input', computeDerived);
+
+  function setupConditionalLogic(){ $$('input[name="livedAbroad"]').forEach(el=>el.addEventListener('change', ()=>toggleHidden('#livedAbroadDetails', getRadio('livedAbroad')==='1'))); $('#prePrimaryOtherChk').addEventListener('change', ()=>toggleHidden('#prePrimaryOtherWrap', $('#prePrimaryOtherChk').checked)); $$('input[name="germanBefore"]').forEach(el=>el.addEventListener('change', ()=>toggleHidden('#germanBeforeDetails', getRadio('germanBefore')==='1'))); $$('input[name="germanAustria"]').forEach(el=>el.addEventListener('change', ()=>toggleHidden('#germanAustriaDetails', getRadio('germanAustria')==='1'))); $$('input[name="expatCommunity"]').forEach(el=>el.addEventListener('change', ()=>toggleHidden('#expatDetails', getRadio('expatCommunity')==='1'))); $$('input[name="backToUK"]').forEach(el=>el.addEventListener('change', ()=>toggleHidden('#backToUKDetails', getRadio('backToUK')==='1'))); $('#hhSpeakEnglishChk').addEventListener('change', ()=>toggleHidden('#hhEnglishVarietyWrap', $('#hhSpeakEnglishChk').checked)); $('#hhSpeakGermanChk').addEventListener('change', ()=>toggleHidden('#hhGermanVarietyWrap', $('#hhSpeakGermanChk').checked)); $('#hhSpeakOtherChk').addEventListener('change', ()=>toggleHidden('#hhOtherSpeakWrap', $('#hhSpeakOtherChk').checked)); $('#hhYouToThem').addEventListener('change', ()=>{ toggleHidden('#hhYouToThemOtherWrap', $('#hhYouToThem').value==='Other' || $('#hhYouToThem').value==='Andere'); toggleHidden('#hhYouToThemGermanWrap', $('#hhYouToThem').value==='German' || $('#hhYouToThem').value==='Deutsch'); }); $('#hhThemToYou').addEventListener('change', ()=>{ toggleHidden('#hhThemToYouOtherWrap', $('#hhThemToYou').value==='Other' || $('#hhThemToYou').value==='Andere'); toggleHidden('#hhThemToYouEnglishWrap', $('#hhThemToYou').value==='English' || $('#hhThemToYou').value==='Englisch'); toggleHidden('#hhThemToYouGermanWrap', $('#hhThemToYou').value==='German' || $('#hhThemToYou').value==='Deutsch'); }); $$('input[name="hasChildren"]').forEach(el=>el.addEventListener('change', ()=>toggleHidden('#childrenDetails', getRadio('hasChildren')==='1'))); $$('input[name="childOtherNames"]').forEach(el=>el.addEventListener('change', ()=>toggleHidden('#childOtherNamesWrap', getRadio('childOtherNames')==='1'))); $('#ukContactLanguage').addEventListener('change', ()=>toggleHidden('#ukContactLanguageOtherWrap', $('#ukContactLanguage').value===I18N[uiLang].other || $('#ukContactLanguage').value==='Other')); $$('input[name="othersCommentEnglish"]').forEach(el=>el.addEventListener('change', ()=>toggleHidden('#othersCommentDetails', getRadio('othersCommentEnglish')==='1'))); $$('input[name="englishChanged"]').forEach(el=>el.addEventListener('change', ()=>toggleHidden('#englishChangedDetails', getRadio('englishChanged')==='1'))); }
+  setupConditionalLogic();
+
+  function updateConsentContinue(){ if (previewMode){ $('#btnConsent').disabled = false; return; } const okChk=!!$('#consentChk').checked, okState=!!String($('#stateSel').value||'').trim(), okCity=!!String($('#citySel').value||'').trim(); $('#btnConsent').disabled = !(okChk && okState && okCity); }
+  $('#consentChk').addEventListener('change', updateConsentContinue); $('#stateSel').addEventListener('change', updateConsentContinue); $('#citySel').addEventListener('input', updateConsentContinue);
+
+  function requireValue(id, msg){ const el=$(id); if (!el || !String(el.value||'').trim()){ alert(msg); if (el) el.focus(); return false; } return true; }
+  function validateQuestionStep(n){ const err=I18N[uiLang].errors; if (n===1){ if (!requireValue('#pid', err.needPid)) return false; if (!requireValue('#birthYear', err.needBirth)) return false; if (!requireValue('#arrivalYear', err.needArrival)) return false; if (!getRadio('livedAbroad')) { alert(err.needLivedAbroad); return false; } if ($$('input[name="prePrimaryLang"]:checked').length===0){ alert(err.needPrePrimary); return false; } return true; } if (n===2){ if (!getRadio('germanBefore')){ alert(err.needGermanBefore); return false; } if (!getRadio('germanAustria')){ alert(err.needGermanAustria); return false; } return true; } return true; }
+  function qNav(to, validateNum){ if (validateNum && !validateQuestionStep(validateNum)) return; show(screens[to]); }
+  $('#btnQ1Next').addEventListener('click', ()=>qNav('q2',1)); $('#btnQ2Back').addEventListener('click', ()=>show(screens.q1)); $('#btnQ2Next').addEventListener('click', ()=>qNav('q3',2)); $('#btnQ3Back').addEventListener('click', ()=>show(screens.q2)); $('#btnQ3Next').addEventListener('click', ()=>show(screens.q4)); $('#btnQ4Back').addEventListener('click', ()=>show(screens.q3)); $('#btnQ4Next').addEventListener('click', ()=>show(screens.q5)); $('#btnQ5Back').addEventListener('click', ()=>show(screens.q4)); $('#btnQ5Next').addEventListener('click', ()=>show(screens.q6)); $('#btnQ6Back').addEventListener('click', ()=>show(screens.q5)); $('#btnQ6Next').addEventListener('click', ()=>show(screens.q7)); $('#btnQ7Back').addEventListener('click', ()=>show(screens.q6)); $('#btnQ7Next').addEventListener('click', ()=>show(screens.q8)); $('#btnQ8Back').addEventListener('click', ()=>show(screens.q7));
+
+  function setOverlay(on, title, msg){ $('#overlayTitle').textContent = title || (on ? I18N[uiLang].overlayUploadTitle : ''); $('#overlayMsg').textContent = msg || (on ? I18N[uiLang].overlayUploadMsg : ''); $('#overlay').classList.toggle('active', !!on); }
+  function updatePreviewUI(){ const btn=$('#btnPreviewMode'); if (!btn) return; btn.classList.toggle('active', previewMode); btn.textContent = uiLang === 'de' ? (previewMode ? 'Vorschaumodus: an' : 'Vorschaumodus: aus') : (previewMode ? 'Preview mode: on' : 'Preview mode: off'); }
+  function ensurePreviewDefaults(){ if (!previewMode) return; if (!participantGroup) participantGroup='EN'; const stateEl=$('#stateSel'), cityEl=$('#citySel'); if (stateEl && !stateEl.value && stateEl.options.length>1) stateEl.selectedIndex=1; if (cityEl && !String(cityEl.value||'').trim()) cityEl.value='Graz'; const pidEl=$('#pid'); if (pidEl && !String(pidEl.value||'').trim()) pidEl.value='PREVIEW01'; const birthYear=$('#birthYear'); if (birthYear && !birthYear.value) birthYear.value='1990'; const sexSel=$('#sexSel'); if (sexSel && !sexSel.value && sexSel.options.length>1) sexSel.selectedIndex=1; const arrivalYear=$('#arrivalYear'); if (arrivalYear && !arrivalYear.value) arrivalYear.value='2015'; const householdCount=$('#householdCount'); if (householdCount && !householdCount.value) householdCount.value='1'; const consentChk=$('#consentChk'); if (consentChk) consentChk.checked=true; computeDerived(); try{ updateConsentContinue(); }catch(e){} }
+  $('#btnGroupDE').addEventListener('click', ()=>{ participantGroup='DE'; setLanguage('de'); show(screens.consent); if (previewMode) ensurePreviewDefaults(); });
+  $('#btnGroupEN').addEventListener('click', ()=>{ participantGroup='EN'; setLanguage('en'); show(screens.consent); if (previewMode) ensurePreviewDefaults(); });
+  $('#btnPreviewMode').addEventListener('click', ()=>{ previewMode = !previewMode; updatePreviewUI(); if (previewMode) ensurePreviewDefaults(); });
+  $('#btnConsent').addEventListener('click', ()=>{ const err=I18N[uiLang].errors; if (previewMode) ensurePreviewDefaults(); if (!previewMode && !$('#consentChk').checked) { alert(err.needConsent); return; } if (!previewMode && !$('#stateSel').value) { alert(err.needState); return; } if (!previewMode && !String($('#citySel').value||'').trim()) { alert(err.needCity); return; } consentGiven=true; consentTimeIso=new Date().toISOString(); try{ localStorage.setItem('consented','1'); localStorage.setItem('consent_time', consentTimeIso); localStorage.setItem('session_id', sessionId); }catch(e){} show(screens.q1); });
+  $('#btnDecline').addEventListener('click', ()=>{ alert(I18N[uiLang].confirmDecline); try{ window.close(); }catch(e){} });
+
+  function buildConsentCsvBlob(pid, taskPlanned){ const header=['session_id','session_start_iso','consent_time_iso','participant_id','task_selected_at_pid_step','bundesland','city','participant_group','ui_language']; const row=[sessionId, sessionStartIso, consentTimeIso, pid || '', taskPlanned || '', $('#stateSel').value || '', ($('#citySel').value||'').trim(), participantGroup || '', uiLang]; return new Blob([[header.join(','), row.map(csvEscape).join(',')].join('\n')], {type:'text/csv'}); }
+  function getCheckboxValues(name){ return $$(`input[name="${name}"]:checked`).map(el=>el.value); }
+  function collectQuestionnaireData(){ computeDerived(); const data={ participant_id:valueOf('#pid').trim(), participant_group:participantGroup||'', ui_language:uiLang, bundesland:$('#stateSel').value||'', city:($('#citySel').value||'').trim(), year_of_birth:valueOf('#birthYear'), year_arrival_austria:valueOf('#arrivalYear'), age:valueOf('#derivedAge'), age_at_migration:valueOf('#derivedAgeMigration'), duration_living_austria:valueOf('#derivedDuration'), lived_other_country_longer_6m:getRadio('livedAbroad'), lived_other_country_years:valueOf('#abroadYears'), lived_other_country_name:valueOf('#abroadCountry'), lived_other_country_from:valueOf('#abroadFrom'), lived_other_country_to:valueOf('#abroadTo'), languages_before_primary_school:getCheckboxValues('prePrimaryLang').join('|'), languages_before_primary_school_other:valueOf('#prePrimaryOther'), german_classes_before_austria:getRadio('germanBefore'), german_before_variety:valueOf('#germanBeforeVariety'), german_before_last_year:valueOf('#germanBeforeLastYear'), german_classes_in_austria:getRadio('germanAustria'), german_in_austria_variety:valueOf('#germanAustriaVariety'), german_in_austria_last_year:valueOf('#germanAustriaLastYear'), expat_community:getRadio('expatCommunity'), expat_since_year:valueOf('#expatSinceYear'), back_to_uk_since_leaving:getRadio('backToUK'), back_to_uk_avg_duration:valueOf('#ukStayDuration'), household_people_besides_self:valueOf('#householdCount'), household_languages_spoken_english:checked01('#hhSpeakEnglishChk'), household_languages_spoken_german:checked01('#hhSpeakGermanChk'), household_languages_spoken_other:checked01('#hhSpeakOtherChk'), household_languages_spoken_other_text:valueOf('#hhOtherSpeak'), household_english_variety:valueOf('#hhEnglishVariety'), household_german_variety:valueOf('#hhGermanVariety'), you_to_household_language:valueOf('#hhYouToThem'), you_to_household_other:valueOf('#hhYouToThemOther'), you_to_household_german_variety:valueOf('#hhYouToThemGermanVariety'), household_to_you_language:valueOf('#hhThemToYou'), household_to_you_other:valueOf('#hhThemToYouOther'), household_to_you_english_variety:valueOf('#hhThemToYouEnglishVariety'), household_to_you_german_variety:valueOf('#hhThemToYouGermanVariety'), has_children:getRadio('hasChildren'), children_english_names:getRadio('childEnglishNames'), children_german_names:getRadio('childGermanNames'), children_other_names:getRadio('childOtherNames'), children_other_names_text:valueOf('#childOtherNamesText'), uk_contact_frequency:getRadio('ukContactFreq'), uk_contact_language:valueOf('#ukContactLanguage'), uk_contact_language_other:valueOf('#ukContactLanguageOther'), uk_contact_method:valueOf('#ukContactMethod'), watch_british_tv:getRadio('watchBritishTV'), listen_british_radio_podcasts:getRadio('listenBritishRadio'), read_british_media:getRadio('readBritishMedia'), listen_austrian_radio_podcasts:getRadio('listenAustrianRadio'), others_comment_english:getRadio('othersCommentEnglish'), others_comment_accent:yesNo12FromCheckbox('#commentAccent'), others_comment_sounds:yesNo12FromCheckbox('#commentSounds'), others_comment_words:yesNo12FromCheckbox('#commentWords'), others_comment_word_order:yesNo12FromCheckbox('#commentWordOrder'), others_comment_pitch:yesNo12FromCheckbox('#commentPitch'), others_comment_grammar:yesNo12FromCheckbox('#commentGrammar'), english_changed:getRadio('englishChanged'), english_changed_accent:yesNo12FromCheckbox('#changedAccent'), english_changed_sounds:yesNo12FromCheckbox('#changedSounds'), english_changed_words:yesNo12FromCheckbox('#changedWords'), english_changed_word_order:yesNo12FromCheckbox('#changedWordOrder'), english_changed_pitch:yesNo12FromCheckbox('#changedPitch'), english_changed_grammar:yesNo12FromCheckbox('#changedGrammar'), final_comment:valueOf('#finalComment') }; I18N[uiLang].profLabels.forEach(([key])=>{ data[`prof_before_${key}`]=getRadio(`prof_before_${key}`); data[`prof_now_${key}`]=getRadio(`prof_now_${key}`); }); I18N[uiLang].generalScales.forEach(([key])=>data[key]=getRadio(key)); I18N[uiLang].domainItems.forEach(([key])=>{ data[`german_domain_${key}`]=getRadio(`german_domain_${key}`); data[`english_domain_${key}`]=getRadio(`english_domain_${key}`); }); I18N[uiLang].mediaScales.forEach(([key])=>data[key]=getRadio(key)); return data; }
+  function buildQuestionnaireCsvBlob(data){ const header=Object.keys(data); const row=header.map(k=>data[k]); return new Blob([[header.join(','), row.map(csvEscape).join(',')].join('\n')], {type:'text/csv'}); }
+  function buildGermanShortDetailsBlob(){
+    const data = {
+      participant_id: valueOf('#pid').trim(),
+      participant_group: participantGroup || '',
+      ui_language: uiLang,
+      year_of_birth: valueOf('#birthYear'),
+      sex: valueOf('#sexSel'),
+      bundesland: $('#stateSel').value || '',
+      city: ($('#citySel').value || '').trim()
+    };
+    const header = Object.keys(data);
+    const row = header.map(k => data[k]);
+    return new Blob([[header.join(','), row.map(csvEscape).join(',')].join('\n')], {type:'text/csv'});
+  }
+  async function uploadBlob(blob, filename, pid, taskId, itemLabel){ if (!UPLOAD_URL) throw new Error('No upload URL'); const base64 = await new Promise((res,rej)=>{ const fr=new FileReader(); fr.onerror=rej; fr.onload=()=>res(String(fr.result).split(',')[1]); fr.readAsDataURL(blob); }); const payload=JSON.stringify({ pid, item:itemLabel || `${taskId} item ${String(itemIdx+1).padStart(2,'0')}`, filename, mime:blob.type || 'application/octet-stream', b64:base64 }); const r=await fetch(UPLOAD_URL,{ method:'POST', headers:{'Content-Type':'text/plain'}, body:payload }); if (!r.ok) throw new Error('HTTP '+r.status); const text=await r.text(); let data; try{ data=JSON.parse(text); }catch(e){ throw new Error('Upload endpoint returned non-JSON response'); } if (!data.ok) throw new Error(data.error || 'Upload failed'); return data; }
+  async function uploadConsentIfNeeded(pid){ if (consentUploaded || !consentGiven || !consentTimeIso) return; const consentBlob=buildConsentCsvBlob(pid,''); const consentName=`${pid}__CONSENT__${isoSafeNow()}__S${sessionId}.csv`; await uploadBlob(consentBlob, consentName, pid, 'CONSENT', 'consent'); consentUploaded = true; }
+  $('#btnQuestionnaireDone').addEventListener('click', async ()=>{ const btn=$('#btnQuestionnaireDone'); const err=I18N[uiLang].errors; if (previewMode) ensurePreviewDefaults(); if (!requireValue('#pid', err.needPid)) return; const pid=valueOf('#pid').trim(); if (previewMode){ questionnaireUploaded=true; show(screens.taskselect); return; } btn.disabled=true; setOverlay(true, I18N[uiLang].overlayQuestionnaireTitle, I18N[uiLang].overlayQuestionnaireMsg); try{ const qData=collectQuestionnaireData(); const qBlob=buildQuestionnaireCsvBlob(qData); const qName=`${pid}__QUESTIONNAIRE__${isoSafeNow()}__S${sessionId}.csv`; await uploadConsentIfNeeded(pid); await uploadBlob(qBlob, qName, pid, 'QUESTIONNAIRE', 'questionnaire'); questionnaireUploaded=true; show(screens.taskselect); }catch(e){ console.error(e); alert(err.questionnaireFail); } finally { setOverlay(false); btn.disabled=false; } });
+
+  $('#btnPickA').addEventListener('click', ()=>pickTask('A')); $('#btnPickB').addEventListener('click', ()=>pickTask('B')); $('#btnBackToTasks2').addEventListener('click', ()=>show(screens.taskselect));
+  function pickTask(tid){ const err=I18N[uiLang].errors; if (previewMode) ensurePreviewDefaults(); selectedTaskId=tid; TASKS=buildTasks(); taskItems=TASKS[tid].items.slice(); itemIdx=0; currentItem=null; const pid=valueOf('#pid').trim(); if (!previewMode && (!pid || !questionnaireUploaded)){ alert(err.completeQuestionnaireFirst); show(screens.q1); return; } if (previewMode) questionnaireUploaded=true; $('#instrTitle').textContent = I18N[uiLang].taskNames[tid]; $('#instrBody').innerHTML = I18N[uiLang].taskInstructions[tid]; show(screens.instr); }
+  $('#btnInstrOk').addEventListener('click', ()=>show(screens.mic));
+
+  let micReady=false, audioCtx=null, stream=null, source=null, workletNode=null, zeroGain=null, selectedDeviceId='', workletModuleUrl=null, testObjUrl=null, recording=false, recBuffers=[], totalLength=0, sampleRate=48000, lastBlob=null, lastDuration=0, recPeak=0, testPeak=0, lastRecPeak=0, recTimer=null, testTimer=null, recStartMs=0, testStartMs=0, testRecording=false, testBuffers=[], testTotalLength=0, testBlob=null, testReady=false;
+  function setMicStatus(t){ $('#status').textContent=t; } function setRunStatus(t){ $('#runStatus').textContent=t; } function setTestStatus(t){ $('#testStatus').textContent=t; }
+  function computeLevel(input){ let sum=0; for(let i=0;i<input.length;i++) sum += input[i]*input[i]; const rms=Math.sqrt(sum/input.length); const db=20*Math.log10(rms + 1e-12); $('#level').textContent = (uiLang==='de' ? 'Pegel: ' : 'Level: ') + `${db.toFixed(1)} dBFS`; }
+  function updatePeak(arr, isTest){ let peak=0; for(let i=0;i<arr.length;i++){ const a=Math.abs(arr[i]); if (a>peak) peak=a; } if (isTest) testPeak=Math.max(testPeak, peak); else recPeak=Math.max(recPeak, peak); }
+  function floatTo16BitPCM(view, offset, input){ for(let i=0;i<input.length;i++, offset+=2){ let s=Math.max(-1, Math.min(1, input[i])); s=s<0 ? s*0x8000 : s*0x7FFF; view.setInt16(offset,s,true); } }
+  function writeWavHeader(view, sampleRate, numChannels, numFrames){ function wr(view,off,str){ for(let i=0;i<str.length;i++) view.setUint8(off+i,str.charCodeAt(i)); } const bps=2, ba=numChannels*bps, br=sampleRate*ba; wr(view,0,'RIFF'); view.setUint32(4,36+numFrames*ba,true); wr(view,8,'WAVE'); wr(view,12,'fmt '); view.setUint32(16,16,true); view.setUint16(20,1,true); view.setUint16(22,numChannels,true); view.setUint32(24,sampleRate,true); view.setUint32(28,br,true); view.setUint16(32,ba,true); view.setUint16(34,16,true); wr(view,36,'data'); view.setUint32(40,numFrames*ba,true); }
+  function encodeWavFromBuffers(buffers, totalLen){ const mono=new Float32Array(totalLen); let off=0; for(const b of buffers){ mono.set(b,off); off+=b.length; } const buf=new ArrayBuffer(44 + mono.length*2); const view=new DataView(buf); writeWavHeader(view, sampleRate, 1, mono.length); floatTo16BitPCM(view,44,mono); return new Blob([view], {type:'audio/wav'}); }
+  function encodeWav(){ return encodeWavFromBuffers(recBuffers, totalLength); }
+  function resetTestUI(){ testRecording=false; testBuffers=[]; testTotalLength=0; testBlob=null; testReady=false; testPeak=0; if (testTimer){ clearInterval(testTimer); testTimer=null; } if (testObjUrl){ try{ URL.revokeObjectURL(testObjUrl); }catch(e){} testObjUrl=null; } setTestStatus(I18N[uiLang].testStatusIdle); $('#btnTestStart').disabled=!micReady; $('#btnTestStop').disabled=true; $('#btnTestPlay').disabled=true; $('#btnTestRedo').disabled=true; $('#testPlayer').style.display='none'; $('#testPlayer').src=''; $('#btnBeginTask').disabled=true; $('#btnBackToTask').style.display = returnToRunAfterMic ? 'inline-block' : 'none'; }
+  function cleanupAudioOnFailure(){ try{ if (stream) stream.getTracks().forEach(t=>t.stop()); }catch(e){} stream=null; try{ if (audioCtx && audioCtx.state!=='closed') audioCtx.close(); }catch(e){} audioCtx=null; source=null; workletNode=null; zeroGain=null; if (workletModuleUrl){ try{ URL.revokeObjectURL(workletModuleUrl); }catch(e){} workletModuleUrl=null; } micReady=false; $('#micSel').innerHTML=`<option value="" selected>${I18N[uiLang].micSelPlaceholder}</option>`; $('#micSel').disabled=true; $('#btnRefreshMics').disabled=true; }
+  async function populateMicList(){ if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return; let devices=[]; try{ devices=await navigator.mediaDevices.enumerateDevices(); }catch(e){ return; } const inputs=devices.filter(d=>d.kind==='audioinput'); const micSel=$('#micSel'); micSel.innerHTML=''; if (inputs.length===0){ const opt=document.createElement('option'); opt.value=''; opt.textContent = uiLang==='de' ? 'Keine Mikrofongeräte gefunden' : 'No microphone devices found'; micSel.appendChild(opt); micSel.disabled=true; return; } inputs.forEach((d,idx)=>{ const opt=document.createElement('option'); opt.value=d.deviceId; opt.textContent=d.label || `${uiLang==='de' ? 'Mikrofon' : 'Microphone'} ${idx+1}`; micSel.appendChild(opt); }); try{ const track=stream && stream.getAudioTracks && stream.getAudioTracks()[0]; const settings=track && track.getSettings ? track.getSettings() : {}; const currentId=settings.deviceId || selectedDeviceId || ''; if (currentId){ micSel.value=currentId; selectedDeviceId=micSel.value || selectedDeviceId; } else { selectedDeviceId=micSel.value; } }catch(e){ selectedDeviceId=micSel.value; } micSel.disabled=false; $('#btnRefreshMics').disabled=false; }
+  async function switchMic(deviceId){ const err=I18N[uiLang].errors; if (!deviceId || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return; if (!audioCtx || !workletNode) return; if (testRecording){ alert(err.stopTestFirst); return; } if (recording){ alert(err.stopRecordingFirst); return; } resetTestUI(); setMicStatus(uiLang==='de' ? 'Mikrofon: wird gewechselt…' : 'Microphone: switching…'); try{ if (stream) stream.getTracks().forEach(t=>t.stop()); }catch(e){} stream=null; try{ if (source) source.disconnect(); }catch(e){} source=null; try{ stream=await navigator.mediaDevices.getUserMedia({ audio:{ deviceId:{ exact:deviceId }, channelCount:{ideal:1}, sampleRate:{ideal:48000}, noiseSuppression:false, echoCancellation:false, autoGainControl:false }}); source=audioCtx.createMediaStreamSource(stream); source.connect(workletNode); selectedDeviceId=deviceId; setMicStatus(uiLang==='de' ? 'Mikrofon: bereit' : 'Microphone: ready'); micReady=true; $('#testBox').style.display='block'; resetTestUI(); await populateMicList(); } catch(e){ console.error(e); setMicStatus(uiLang==='de' ? 'Mikrofon: Fehler' : 'Microphone: error'); alert(err.micSwitchFail); cleanupAudioOnFailure(); $('#btnInit').disabled=false; } }
+  async function initMic(){ const err=I18N[uiLang].errors; if (micReady) return; if (previewMode){ micReady=true; testReady=true; sampleRate=48000; setMicStatus(uiLang==='de' ? 'Mikrofon: Vorschaumodus' : 'Microphone: preview mode'); $('#sr').textContent='sr: 48000 Hz'; $('#level').textContent = uiLang==='de' ? 'Pegel: Vorschau' : 'Level: preview'; $('#testBox').style.display='block'; setTestStatus(uiLang==='de' ? 'Test: übersprungen' : 'Test: skipped'); $('#btnTestStart').disabled=false; $('#btnTestStop').disabled=true; $('#btnTestPlay').disabled=true; $('#btnTestRedo').disabled=false; $('#btnBeginTask').disabled=false; $('#btnInit').disabled=true; return; } $('#btnInit').disabled=true; setMicStatus(uiLang==='de' ? 'Mikrofon: wird gestartet…' : 'Microphone: starting…'); try{ const audioConstraints={ channelCount:{ideal:1}, sampleRate:{ideal:48000}, noiseSuppression:false, echoCancellation:false, autoGainControl:false }; if (selectedDeviceId) audioConstraints.deviceId={ exact:selectedDeviceId }; stream=await navigator.mediaDevices.getUserMedia({ audio:audioConstraints }); audioCtx=new (window.AudioContext || window.webkitAudioContext)({ sampleRate:48000 }); try{ await audioCtx.resume(); }catch(e){} sampleRate=audioCtx.sampleRate; $('#sr').textContent = `sr: ${sampleRate} Hz`; source=audioCtx.createMediaStreamSource(stream); const workletCode=`class P extends AudioWorkletProcessor{ process(inputs){ const input=inputs[0]; if (!input || input.length===0) return true; const nCh=input.length, n=input[0].length; const mono=new Float32Array(n); for(let ch=0; ch<nCh; ch++){ const data=input[ch]; if (!data) continue; for(let i=0;i<n;i++) mono[i]+=data[i]/nCh; } this.port.postMessage(mono); return true; } } registerProcessor('rec-p', P);`; workletModuleUrl=URL.createObjectURL(new Blob([workletCode],{type:'application/javascript'})); try{ await audioCtx.audioWorklet.addModule(workletModuleUrl); } finally { try{ URL.revokeObjectURL(workletModuleUrl); }catch(e){} workletModuleUrl=null; } workletNode=new AudioWorkletNode(audioCtx,'rec-p'); zeroGain=audioCtx.createGain(); zeroGain.gain.value=0.0; source.connect(workletNode); workletNode.connect(zeroGain); zeroGain.connect(audioCtx.destination); workletNode.port.onmessage=(e)=>{ const d=e.data; if (testRecording) updatePeak(d,true); if (recording) updatePeak(d,false); if (testRecording){ const copy=new Float32Array(d.length); copy.set(d); testBuffers.push(copy); testTotalLength+=copy.length; computeLevel(copy); return; } if (recording){ const copy=new Float32Array(d.length); copy.set(d); recBuffers.push(copy); totalLength+=copy.length; computeLevel(copy); return; } computeLevel(d); }; setMicStatus(uiLang==='de' ? 'Mikrofon: bereit' : 'Microphone: ready'); micReady=true; await populateMicList(); $('#testBox').style.display='block'; resetTestUI(); }catch(e){ console.error(e); cleanupAudioOnFailure(); setMicStatus(uiLang==='de' ? 'Mikrofon: Fehler' : 'Microphone: error'); alert(err.micInitFail); $('#btnInit').disabled=false; return; } $('#btnInit').disabled=true; }
+  $('#btnInit').addEventListener('click', initMic); $('#btnRefreshMics').addEventListener('click', async ()=>{ await populateMicList(); }); $('#micSel').addEventListener('change', ()=>{ const id=$('#micSel').value || ''; if (!id) return; selectedDeviceId=id; if (micReady) switchMic(id); });
+  function startTest(){ const err=I18N[uiLang].errors; if (previewMode){ testReady=true; setTestStatus(uiLang==='de' ? 'Test: übersprungen' : 'Test: skipped'); $('#btnBeginTask').disabled=false; return; } if (!micReady || !audioCtx) return; if (audioCtx.state==='suspended') audioCtx.resume().catch(()=>{}); if (recording){ alert(err.stopRecordingFirst); return; } testRecording=true; testBuffers=[]; testTotalLength=0; testBlob=null; testReady=false; testPeak=0; setTestStatus(uiLang==='de' ? 'Test: Aufnahme läuft…' : 'Test: recording…'); $('#btnTestStart').disabled=true; $('#btnTestStop').disabled=false; $('#btnTestPlay').disabled=true; $('#btnTestRedo').disabled=true; $('#testPlayer').style.display='none'; $('#testPlayer').src=''; $('#btnBeginTask').disabled=true; if (testTimer) clearInterval(testTimer); testStartMs=Date.now(); testTimer=setInterval(()=>{ if (testRecording && (Date.now()-testStartMs)>=MAX_REC_SECONDS*1000) stopTest(); },250); }
+  function stopTest(){ const err=I18N[uiLang].errors; if (previewMode){ testReady=true; setTestStatus(uiLang==='de' ? 'Test: übersprungen' : 'Test: skipped'); $('#btnBeginTask').disabled=false; return; } if (!testRecording) return; testRecording=false; if (testTimer){ clearInterval(testTimer); testTimer=null; } if (testPeak < SILENCE_PEAK_THRESHOLD){ setTestStatus(uiLang==='de' ? 'Test: kein Audio erkannt ⚠' : 'Test: no audio detected ⚠'); alert(err.noAudioTest); resetTestUI(); return; } testBlob=encodeWavFromBuffers(testBuffers, testTotalLength); testReady=true; setTestStatus(uiLang==='de' ? 'Test: bereit' : 'Test: ready'); $('#btnTestStop').disabled=true; $('#btnTestStart').disabled=true; $('#btnTestPlay').disabled=false; $('#btnTestRedo').disabled=false; $('#testPlayer').style.display='block'; if (testObjUrl){ try{ URL.revokeObjectURL(testObjUrl); }catch(e){} testObjUrl=null; } testObjUrl=URL.createObjectURL(testBlob); $('#testPlayer').src=testObjUrl; $('#btnBeginTask').disabled=false; }
+  function playTest(){ if (previewMode) return; if (testReady && $('#testPlayer').src) $('#testPlayer').play().catch(()=>{}); }
+  function redoTest(){ if (previewMode){ testReady=true; $('#btnBeginTask').disabled=false; setTestStatus(uiLang==='de' ? 'Test: übersprungen' : 'Test: skipped'); return; } resetTestUI(); }
+  $('#btnTestStart').addEventListener('click', startTest); $('#btnTestStop').addEventListener('click', stopTest); $('#btnTestPlay').addEventListener('click', playTest); $('#btnTestRedo').addEventListener('click', redoTest);
+  function goToMicFromRun(){ const err=I18N[uiLang].errors; if (recording){ alert(err.stopRecordingFirst); return; } if (testRecording){ alert(err.stopTestFirst); return; } returnToRunAfterMic=true; resetTestUI(); $('#btnBackToTask').style.display='inline-block'; show(screens.mic); }
+  $('#btnGoMic').addEventListener('click', goToMicFromRun); $('#btnBackToTask').addEventListener('click', ()=>{ const err=I18N[uiLang].errors; if (!micReady){ alert(err.micFirst); return; } if (!testReady){ alert(err.completeTestFirst); return; } $('#btnBackToTask').style.display='none'; returnToRunAfterMic=false; show(screens.run); renderCurrentItem(); });
+  $('#btnBeginTask').addEventListener('click', ()=>{ const err=I18N[uiLang].errors; if (!previewMode && (!micReady || !audioCtx || !stream)){ alert(err.micFirst); return; } if (!previewMode && !testReady){ alert(err.completeTestFirst); return; } if (returnToRunAfterMic){ $('#btnBackToTask').style.display='none'; returnToRunAfterMic=false; show(screens.run); renderCurrentItem(); return; } startTaskRun(); });
+
+  const sessionRows=[]; const CSV_HEADER=['session_id','session_start_iso','participant_id','participant_group','ui_language','task','lang','condition','target_token','item_index','prompt_text','primes','filename_wav','accepted_at_iso','duration_seconds','sample_rate_hz']; const takeCounters=Object.create(null);
+  function nextTakeNumber(pid, targetToken, langCode, condition){ const key=`${pid}__${targetToken}__${langCode}__${condition}`; const n=(takeCounters[key] || 0) + 1; takeCounters[key]=n; return String(n).padStart(2,'0'); }
+  function buildWavNameFromItem(item){ const pid=(valueOf('#pid') || 'anon').trim(); const targetTok=sanitizeToken(item.targetToken || 'unknown'); const lang=item.lang || (selectedTaskId==='A' ? 'E' : 'G'); const cond=item.condition || 'C0'; const take=nextTakeNumber(pid, targetTok, lang, cond); return `${pid}_${targetTok}_${lang}_${cond}_${take}.wav`; }
+  function buildSessionCsvBlob(){ const lines=[CSV_HEADER.join(',')]; for (const row of sessionRows) lines.push(row.map(csvEscape).join(',')); return new Blob([lines.join('\n')], {type:'text/csv'}); }
+  function renderCurrentItem(){ const t=I18N[uiLang]; $('#runTaskLabel').textContent = t.taskNames[selectedTaskId] || `Task ${selectedTaskId || '—'}`; const N=taskItems.length || 0; $('#progress').textContent = `${uiLang==='de' ? 'Item' : 'Item'} ${Math.min(itemIdx+1, Math.max(N,1))} / ${Math.max(N,1)}`; currentItem=taskItems[itemIdx] || null; if (currentItem && currentItem.primes){ $('#primesBox').style.display='block'; $('#primesWords').innerHTML=''; for (const w of currentItem.primes){ const span=document.createElement('span'); span.className='prime-word'; span.textContent=w; $('#primesWords').appendChild(span); } $('#groupTitle').textContent = currentItem.taskId === 'B' ? t.runGroupTaskB : t.runGroupTaskB; $('#runHint').innerHTML = t.runHintTaskB; } else { $('#primesBox').style.display='none'; $('#primesWords').innerHTML=''; $('#groupTitle').textContent = t.runGroupTaskA; $('#runHint').innerHTML = t.runHintTaskA; } $('#promptDisplay').textContent = currentItem ? currentItem.promptText : '—'; recording=false; recBuffers=[]; totalLength=0; lastBlob=null; lastDuration=0; recPeak=0; lastRecPeak=0; if (recTimer){ clearInterval(recTimer); recTimer=null; } setRunStatus(t.runStatusIdle); $('#btnStartRec').disabled=(N===0); $('#btnStopRec').disabled=true; $('#btnAccept').disabled=!previewMode; $('#btnNext').disabled=!previewMode; if (previewMode) setRunStatus(uiLang==='de' ? 'Vorschaumodus' : 'Preview mode'); }
+  function startTaskRun(){ if (!TASKS[selectedTaskId]){ alert(I18N[uiLang].errors.taskNotFound); show(screens.taskselect); return; } show(screens.run); renderCurrentItem(); }
+  function startRecording(){ const err=I18N[uiLang].errors; if (previewMode){ setRunStatus(uiLang==='de' ? 'Vorschauaufnahme' : 'Preview recording'); $('#btnStopRec').disabled=false; $('#btnAccept').disabled=false; $('#btnNext').disabled=false; $('#btnStartRec').disabled=true; return; } if (recording || !audioCtx) return; if (testRecording){ alert(err.stopTestFirst); return; } if (audioCtx.state==='suspended') audioCtx.resume().catch(()=>{}); recBuffers=[]; totalLength=0; lastBlob=null; lastDuration=0; recPeak=0; recording=true; setRunStatus(uiLang==='de' ? 'Aufnahme läuft…' : 'Recording…'); $('#btnStartRec').disabled=true; $('#btnStopRec').disabled=false; $('#btnAccept').disabled=true; $('#btnNext').disabled=true; if (recTimer) clearInterval(recTimer); recStartMs=Date.now(); recTimer=setInterval(()=>{ if (recording && (Date.now()-recStartMs)>=MAX_REC_SECONDS*1000) stopRecording(); },250); }
+  function stopRecording(){ const err=I18N[uiLang].errors; if (previewMode){ setRunStatus(uiLang==='de' ? 'Vorschau gestoppt' : 'Preview stopped'); $('#btnStopRec').disabled=true; $('#btnAccept').disabled=false; $('#btnNext').disabled=false; $('#btnStartRec').disabled=false; return; } if (!recording) return; recording=false; if (recTimer){ clearInterval(recTimer); recTimer=null; } if (recPeak < SILENCE_PEAK_THRESHOLD){ setRunStatus(uiLang==='de' ? 'Kein Audio erkannt ⚠' : 'No audio detected ⚠'); alert(err.noAudioRecording); lastBlob=null; lastDuration=0; $('#btnStopRec').disabled=true; $('#btnAccept').disabled=true; $('#btnStartRec').disabled=false; return; } lastBlob=encodeWav(); lastDuration=totalLength / sampleRate; lastRecPeak=recPeak; setRunStatus(uiLang==='de' ? 'Gestoppt' : 'Stopped'); $('#btnStopRec').disabled=true; $('#btnAccept').disabled=false; }
+  async function acceptAndSave(){ const err=I18N[uiLang].errors; if (previewMode){ setRunStatus(uiLang==='de' ? 'Vorschau gespeichert ✓' : 'Preview saved ✓'); $('#btnNext').disabled=false; $('#btnAccept').disabled=true; return; } if (!lastBlob || !currentItem){ alert(err.recordFirst); return; } if (lastRecPeak < SILENCE_PEAK_THRESHOLD){ alert(err.noAudioSave); lastBlob=null; $('#btnAccept').disabled=true; $('#btnStartRec').disabled=false; return; } const pid=(valueOf('#pid') || 'anon').trim(); const taskId=selectedTaskId || 'X'; const wavName=buildWavNameFromItem(currentItem); setOverlay(true, I18N[uiLang].overlayUploadTitle, I18N[uiLang].overlayUploadMsg); $('#btnAccept').disabled=true; $('#btnNext').disabled=true; $('#btnStopRec').disabled=true; $('#btnStartRec').disabled=true; const acceptedAt=new Date().toISOString(); try{ await uploadBlob(lastBlob, wavName, pid, taskId); setRunStatus(uiLang==='de' ? 'Hochgeladen ✓' : 'Uploaded ✓'); } catch(e){ console.warn(e); saveLocal(lastBlob, wavName); setRunStatus(uiLang==='de' ? 'Lokal gespeichert' : 'Saved locally'); } sessionRows.push([sessionId, sessionStartIso, pid, participantGroup || '', uiLang, taskId, currentItem.lang || '', currentItem.condition || '', currentItem.targetToken || '', String(itemIdx+1), currentItem.promptText || '', currentItem.primes ? currentItem.primes.join('|') : '', wavName, acceptedAt, lastDuration.toFixed(3), String(sampleRate)]); setOverlay(false); $('#btnNext').disabled=false; }
+  function nextItem(){ itemIdx++; if (itemIdx >= taskItems.length){ finishTask(); return; } renderCurrentItem(); }
+  async function finishTask(){ const pid=(valueOf('#pid') || 'anon').trim(); const taskId=selectedTaskId || 'X'; if (previewMode){ show(screens.done); const taskName=I18N[uiLang].taskNames[selectedTaskId] || `Task ${taskId}`; $('#summary').textContent = uiLang==='de' ? `${taskName} im Vorschaumodus beendet. Es wurden keine Uploads oder echten Aufnahmen ausgeführt.` : `${taskName} finished in preview mode. No uploads or real recordings were made.`; return; } const csvBlob=buildSessionCsvBlob(); const csvName=`${pid}__${taskId}__SESSION__${isoSafeNow()}__S${sessionId}.csv`; setOverlay(true, I18N[uiLang].overlaySessionTitle, I18N[uiLang].overlaySessionMsg); let csvUploaded=false; try{ await uploadBlob(csvBlob, csvName, pid, taskId, 'session_log'); csvUploaded=true; } catch(e){ console.warn(e); saveLocal(csvBlob, csvName); } finally { setOverlay(false); } show(screens.done); const taskName=I18N[uiLang].taskNames[selectedTaskId] || `Task ${taskId}`; $('#summary').textContent = uiLang==='de' ? `${taskName} abgeschlossen für Teilnehmer:in ${pid}. Gespeicherte Aufnahmen: ${taskItems.length}. Sitzungsprotokoll: ${csvUploaded ? 'hochgeladen ✓' : 'lokal gespeichert'}.` : `${taskName} complete for participant ${pid}. Recordings saved: ${taskItems.length}. Session log: ${csvUploaded ? 'uploaded ✓' : 'saved locally'}.`; }
+  $('#btnStartRec').addEventListener('click', startRecording); $('#btnStopRec').addEventListener('click', stopRecording); $('#btnAccept').addEventListener('click', acceptAndSave); $('#btnNext').addEventListener('click', nextItem); $('#btnBackToTasksDone').addEventListener('click', ()=>{ selectedTaskId=null; taskItems=[]; itemIdx=0; currentItem=null; show(screens.taskselect); });
+
+  setLanguage('en'); updateConsentContinue();
+  // German path uses only short participant details after consent
+  function configureShortGermanPath(){
+    const sexSel = $("#sexSel");
+    if (sexSel && sexSel.options.length >= 4){
+      sexSel.options[0].textContent = uiLang === 'de' ? 'Bitte auswählen…' : 'Please select…';
+      sexSel.options[1].textContent = uiLang === 'de' ? 'Weiblich' : 'Female';
+      sexSel.options[2].textContent = uiLang === 'de' ? 'Männlich' : 'Male';
+      sexSel.options[3].textContent = uiLang === 'de' ? 'Andere / keine Angabe' : 'Other / prefer not to say';
+    }
+    const short = participantGroup === 'DE';
+    ["#q1Badge1","#q1Badge2"].forEach(sel=>{ const el=$(sel); if (el) el.style.display = short ? 'none' : ''; });
+    const q1h = $('#q1Heading'); if (q1h && short) q1h.textContent = 'Angaben zur Person';
+    const sx = $('#sexLabel'); if (sx && short) sx.textContent = 'Geschlecht';
+    ['#arrivalYearLabel','#householdCountLabel','#derivedAgeLabel','#derivedAgeMigrationLabel','#derivedDurationLabel','#livedAbroadLabel','#prePrimaryLabel'].forEach(()=>{});
+    const hideSelectors = ['#arrivalYear', '#householdCount', '#derivedAge', '#derivedAgeMigration', '#derivedDuration'];
+    hideSelectors.forEach(sel=>{ const el=$(sel); if (el) { const field=el.closest('.field'); if(field) field.classList.toggle('hidden', short); } });
+    const lived = $('#livedAbroadDetails')?.closest('.q-card') || $('#livedAbroadLabel')?.closest('.q-card'); if (lived) lived.classList.toggle('hidden', short);
+    const pre = $('#prePrimaryOtherWrap')?.closest('.q-card') || $('#prePrimaryLabel')?.closest('.q-card'); if (pre) pre.classList.toggle('hidden', short);
+    const sexField = $('#sexSel')?.closest('.field'); if (sexField) sexField.classList.toggle('hidden', !short && false);
+    const btn = $('#btnQ1Next'); if (btn && short) btn.textContent = 'Weiter';
+  }
+
+  const _setLanguage = setLanguage;
+  setLanguage = function(lang){ _setLanguage(lang); configureShortGermanPath(); };
+
+  const _validateQuestionStep = validateQuestionStep;
+  validateQuestionStep = function(n){
+    if (previewMode){ ensurePreviewDefaults(); return true; }
+    if (participantGroup === 'DE' && n === 1){
+      const err = I18N[uiLang].errors;
+      if (!requireValue('#pid', err.needPid)) return false;
+      if (!requireValue('#birthYear', err.needBirth)) return false;
+      if (!$('#sexSel').value){ alert(uiLang==='de' ? 'Bitte wählen Sie Ihr Geschlecht aus.' : 'Please select your sex.'); return false; }
+      return true;
+    }
+    return _validateQuestionStep(n);
+  };
+
+  const _qNav = qNav;
+  qNav = async function(nextKey, validateNum){
+    if (participantGroup === 'DE' && nextKey === 'q2') {
+      if (!validateQuestionStep(validateNum)) return;
+      const pid=valueOf('#pid').trim();
+      if (previewMode){ questionnaireUploaded = true; show(screens.taskselect); return; }
+      setOverlay(true, uiLang==='de' ? 'Verarbeitung…' : 'Processing…', uiLang==='de' ? 'Bitte warten.' : 'Please wait.');
+      try{
+        await uploadConsentIfNeeded(pid);
+        const shortBlob = buildGermanShortDetailsBlob();
+        const shortName = `${pid}__PARTICIPANT_DETAILS__${isoSafeNow()}__S${sessionId}.csv`;
+        await uploadBlob(shortBlob, shortName, pid, 'DETAILS', 'participant_details');
+        questionnaireUploaded = true;
+        show(screens.taskselect);
+      }catch(e){
+        console.error(e);
+        alert(I18N[uiLang].errors.questionnaireFail);
+      } finally {
+        setOverlay(false);
+      }
+      return;
+    }
+    return _qNav(nextKey, validateNum);
+  };
+
+  const _collectQuestionnaireData = collectQuestionnaireData;
+  collectQuestionnaireData = function(){
+    const data = _collectQuestionnaireData();
+    data.sex = valueOf('#sexSel');
+    return data;
+  };
+
+  configureShortGermanPath();
+  updatePreviewUI();
+  if (previewMode) ensurePreviewDefaults();
+
+})();
+</script>
+</body>
+</html>
