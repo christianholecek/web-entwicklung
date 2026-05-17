@@ -1,0 +1,5 @@
+Für die JavaScript-Erweiterung meines Projekts möchte ich eine Aufgabenanwendung in meine bestehende Webseite einbauen. Da meine Webseite für Sprachaufnahmen gedacht ist, ist die Anwendung direkt mit dem Thema meines Projekts verknüpft - ich muss den Teilnehmern die Wörter und Sätze, die sie aufnehmen sollen auf dem Bildschirm anzeigen. Die Teilnehmer sollen zwischen den beiden Aufgaben (Englisch oder Deutsch) wählen können.
+
+Die Inhalte der Aufgaben sind Reimwörter und anschließend ein carrier phrase mit dem target word. Diese sollen aus einer externen JSON-Datei geladen werden. Die Daten sollen mit JavaScript eingelesen werden und dann je nach ausgewählter Aufgabe angezeigt werden. Nach der Auswahl der Aufgabe wird jeweils ein Item nach dem anderen eingeblendet. Über einen "Weiter"-Button navigieren die Teilnehmer durch die Items. Zusätzlich soll der Fortschritt angezeigt werden (zB Item 1 von 10).
+
+Wenn alle Items einer Aufgabe abgeschlossen sind, wird diese Aufgabe als erledigt markiert und kann nicht noch einmal gestartet werden. Wenn beide Aufgaben abgeschlossen sind, erscheint eine Abschlussanzeige.
