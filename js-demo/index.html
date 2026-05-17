@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sprachaufnahme-Aufgaben</title>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f0f0f0;
+      color: #111;
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 36px;
+      box-shadow: 0 4px 28px rgba(0,0,0,0.09);
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      margin: 0 0 28px;
+      color: #777;
+      font-size: 14px;
+    }
+
+    /* Task picker */
+    .task-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .btn-task {
+      padding: 10px 22px;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      background: #fff;
+      color: #333;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .btn-task:hover {
+      border-color: #bbb;
+      background: #fafafa;
+    }
+
+    .btn-task.active {
+      background: #ffd500;
+      border-color: #ffd500;
+      color: #000;
+    }
+
+    .btn-task.done {
+      background: #eefbe8;
+      border-color: #a8d8a0;
+      color: #4a8a40;
+      cursor: not-allowed;
+      opacity: 0.75;
+    }
+
+    .btn-task.done:hover {
+      background: #eefbe8;
+      border-color: #a8d8a0;
+    }
+
+    /* Progress */
+    .progress-area {
+      margin-bottom: 32px;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 7px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 7px;
+      background: #eee;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #ffd500;
+      border-radius: 999px;
+      width: 0%;
+      transition: width 0.35s ease;
+    }
+
+    /* Main content area */
+    #mainContent {
+      min-height: 220px;
+    }
+
+    .empty-state {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 220px;
+      font-size: 16px;
+      color: #ccc;
+      text-align: center;
+    }
+
+    /* Primes */
+    .section-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: #bbb;
+      margin-bottom: 12px;
+    }
+
+    .primes-list {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+
+    .prime-chip {
+      padding: 10px 22px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 999px;
+      background: #f7f7f7;
+      font-size: 20px;
+      font-weight: 600;
+      color: #222;
+    }
+
+    /* Carrier sentence */
+    .sentence-box {
+      min-height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 36px;
+    }
+
+    #promptDisplay {
+      font-size: 38px;
+      font-weight: 500;
+      text-align: center;
+      line-height: 1.3;
+      color: #111;
+    }
+
+    /* Next button */
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-next {
+      padding: 12px 30px;
+      border: none;
+      border-radius: 12px;
+      background: #111;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-next:hover {
+      background: #333;
+    }
+
+    /* Done state */
+    .done-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 220px;
+      text-align: center;
+      gap: 8px;
+    }
+
+    .done-badge {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #ffd500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 8px;
+    }
+
+    .done-title {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .done-sub {
+      font-size: 14px;
+      color: #999;
+    }
+
+    #statusMsg {
+      margin-top: 16px;
+      font-size: 13px;
+      color: #e55;
+      text-align: center;
+      min-height: 18px;
+    }
+
+    /* All-done screen */
+    .alldone-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 220px;
+      text-align: center;
+      gap: 10px;
+    }
+
+    .alldone-title {
+      font-size: 26px;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+
+    .alldone-sub {
+      font-size: 16px;
+      color: #666;
+    }
+
+    /* Confetti */
+    .confetti-piece {
+      position: fixed;
+      top: -40px;
+      pointer-events: none;
+      z-index: 9999;
+      animation: confettiFall linear forwards;
+      user-select: none;
+    }
+
+    @keyframes confettiFall {
+      0%   { transform: translateY(0) rotate(0deg);   opacity: 1; }
+      80%  { opacity: 1; }
+      100% { transform: translateY(110vh) rotate(540deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Sprachaufnahme-Aufgaben</h1>
+      <p class="subtitle">Wählen Sie eine Aufgabe, um zu beginnen.</p>
+
+      <div class="task-row">
+        <button class="btn-task" id="btnPickA">Aufgabe A</button>
+        <button class="btn-task" id="btnPickB">Aufgabe B</button>
+      </div>
+
+      <div class="progress-area">
+        <div class="progress-meta">
+          <span id="taskName">Keine Aufgabe gewählt</span>
+          <span id="progressText"></span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <div id="mainContent">
+        <div class="empty-state">Aufgabe auswählen, um zu starten.</div>
+      </div>
+
+      <div id="statusMsg"></div>
+    </div>
+  </div>
+
+  <script src="js/taskapp.js"></script>
+</body>
+</html>

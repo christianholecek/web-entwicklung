@@ -1,0 +1,42 @@
+{
+  "taskA": {
+    "name": "Aufgabe A — Englisches Reimen",
+    "items": [
+      {
+        "targetToken": "heed",
+        "primes": ["need", "seed", "feed"],
+        "promptText": "Say h__d again."
+      },
+      {
+        "targetToken": "hid",
+        "primes": ["kid", "lid", "bid"],
+        "promptText": "We said h__d together."
+      },
+      {
+        "targetToken": "head",
+        "primes": ["bed", "fed", "led"],
+        "promptText": "Say h__d again."
+      }
+    ]
+  },
+  "taskB": {
+    "name": "Aufgabe B — Deutsches Reimen",
+    "items": [
+      {
+        "targetToken": "hiet",
+        "primes": ["sieht", "zieht", "Lied"],
+        "promptText": "Er hat H__t gesagt."
+      },
+      {
+        "targetToken": "hat",
+        "primes": ["matt", "satt", "glatt"],
+        "promptText": "Wir haben H__t gesagt."
+      },
+      {
+        "targetToken": "huht",
+        "primes": ["gut", "Blut", "Mut"],
+        "promptText": "Er hat H__t gesagt."
+      }
+    ]
+  }
+}
