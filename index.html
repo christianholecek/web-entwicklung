@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div class="wrap">
   <div class="card">
 
@@ -20,11 +21,11 @@
            alt="University of Graz">
     </header>
 
-    <main>
+    <main id="main-content">
     <!-- ═══════════════════════════════════════════
          SCREEN 0 — group selection
     ═══════════════════════════════════════════ -->
-    <div id="scr-group" class="screen active">
+    <section id="scr-group" class="screen active">
       <h2 id="grpTitle">Welcome / Willkommen</h2>
       <p id="grpSubtitle">Please select your group. / Bitte wählen Sie Ihre Gruppe.</p>
 
@@ -43,13 +44,13 @@
         </div>
       </div>
 
-    </div>
+    </section>
 
     <!-- ═══════════════════════════════════════════
          SCREEN 1 — consent
          (content swapped by JS based on group)
     ═══════════════════════════════════════════ -->
-    <div id="scr-consent" class="screen">
+    <section id="scr-consent" class="screen">
       <h2 id="consentTitle">Participant Information &amp; Consent</h2>
 
       <div class="consent-box" id="consentText">
@@ -74,13 +75,13 @@
       </div>
 
       <p class="footnote" id="consentFootnote">You must tick the box above to continue.</p>
-    </div>
+    </section>
 
     <!-- ═══════════════════════════════════════════
          SCREEN 2a — participant details (DE group)
          Short metadata form only
     ═══════════════════════════════════════════ -->
-    <div id="scr-details-de" class="screen">
+    <section id="scr-details-de" class="screen">
       <h2 id="detailDeTitle">Ihre Angaben</h2>
       <p id="detailDeSubtitle">Bitte füllen Sie alle Felder aus.</p>
 
@@ -142,13 +143,13 @@
       </div>
 
       <p class="footnote">Mit <span class="req">*</span> markierte Felder sind Pflichtfelder.</p>
-    </div>
+    </section>
 
     <!-- ═══════════════════════════════════════════
          SCREEN 2b — participant details (EN group)
          Entry point into the full questionnaire
     ═══════════════════════════════════════════ -->
-    <div id="scr-details-en" class="screen">
+    <section id="scr-details-en" class="screen">
       <h2>Your details</h2>
       <p>Please fill in all fields.</p>
 
@@ -210,7 +211,7 @@
       </div>
 
       <p class="footnote">Fields marked <span class="req">*</span> are required.</p>
-    </div>
+    </section>
 
     <!-- ═══════════════════════════════════════════
          SCREENS 3–10 — full questionnaire (EN group only)
@@ -218,7 +219,7 @@
     ═══════════════════════════════════════════ -->
 
     <!-- Q1: Basic background -->
-    <div id="scr-quest-1" class="screen">
+    <section id="scr-quest-1" class="screen">
       <div class="step-badges">
         <span class="step-badge">Questionnaire step 1 of 8</span>
         <span class="step-badge">Background</span>
@@ -301,10 +302,10 @@
         <button id="btnQ1Next">Continue</button>
         <button id="btnQ1Back" class="btn-ghost">Back</button>
       </div>
-    </div>
+    </section>
 
     <!-- Q2: German learning -->
-    <div id="scr-quest-2" class="screen">
+    <section id="scr-quest-2" class="screen">
       <div class="step-badges">
         <span class="step-badge">Questionnaire step 2 of 8</span>
         <span class="step-badge">German learning</span>
@@ -377,10 +378,10 @@
         <button id="btnQ2Next">Continue</button>
         <button id="btnQ2Back" class="btn-ghost">Back</button>
       </div>
-    </div>
+    </section>
 
     <!-- Q3: Use and attitudes -->
-    <div id="scr-quest-3" class="screen">
+    <section id="scr-quest-3" class="screen">
       <div class="step-badges">
         <span class="step-badge">Questionnaire step 3 of 8</span>
         <span class="step-badge">Use and attitudes</span>
@@ -420,10 +421,10 @@
         <button id="btnQ3Next">Continue</button>
         <button id="btnQ3Back" class="btn-ghost">Back</button>
       </div>
-    </div>
+    </section>
 
     <!-- Q4: Household -->
-    <div id="scr-quest-4" class="screen">
+    <section id="scr-quest-4" class="screen">
       <div class="step-badges">
         <span class="step-badge">Questionnaire step 4 of 8</span>
         <span class="step-badge">Household</span>
@@ -580,10 +581,10 @@
         <button id="btnQ4Next">Continue</button>
         <button id="btnQ4Back" class="btn-ghost">Back</button>
       </div>
-    </div>
+    </section>
 
     <!-- Q5: UK contact -->
-    <div id="scr-quest-5" class="screen">
+    <section id="scr-quest-5" class="screen">
       <div class="step-badges">
         <span class="step-badge">Questionnaire step 5 of 8</span>
         <span class="step-badge">UK contact</span>
@@ -625,10 +626,10 @@
         <button id="btnQ5Next">Continue</button>
         <button id="btnQ5Back" class="btn-ghost">Back</button>
       </div>
-    </div>
+    </section>
 
     <!-- Q6: Domains -->
-    <div id="scr-quest-6" class="screen">
+    <section id="scr-quest-6" class="screen">
       <div class="step-badges">
         <span class="step-badge">Questionnaire step 6 of 8</span>
         <span class="step-badge">Domains</span>
@@ -648,10 +649,10 @@
         <button id="btnQ6Next">Continue</button>
         <button id="btnQ6Back" class="btn-ghost">Back</button>
       </div>
-    </div>
+    </section>
 
     <!-- Q7: Media and plans -->
-    <div id="scr-quest-7" class="screen">
+    <section id="scr-quest-7" class="screen">
       <div class="step-badges">
         <span class="step-badge">Questionnaire step 7 of 8</span>
         <span class="step-badge">Media and plans</span>
@@ -701,10 +702,10 @@
         <button id="btnQ7Next">Continue</button>
         <button id="btnQ7Back" class="btn-ghost">Back</button>
       </div>
-    </div>
+    </section>
 
     <!-- Q8: English change -->
-    <div id="scr-quest-8" class="screen">
+    <section id="scr-quest-8" class="screen">
       <div class="step-badges">
         <span class="step-badge">Questionnaire step 8 of 8</span>
         <span class="step-badge">English change</span>
@@ -760,12 +761,12 @@
         <button id="btnQuestionnaireDone">Finish questionnaire</button>
         <button id="btnQ8Back" class="btn-ghost">Back</button>
       </div>
-    </div>
+    </section>
 
     <!-- ═══════════════════════════════════════════
          SCREEN 11 — task selection
     ═══════════════════════════════════════════ -->
-    <div id="scr-taskselect" class="screen">
+    <section id="scr-taskselect" class="screen">
       <h2 id="taskSelTitle">Choose a task</h2>
       <p id="taskSelSubtitle" class="subtitle">You must complete both tasks. You may do them in any order.</p>
 
@@ -774,12 +775,12 @@
       </div>
 
       <p class="footnote" id="taskSelFootnote">Take a break of at least 15 minutes between tasks if completing both in one session.</p>
-    </div>
+    </section>
 
     <!-- ═══════════════════════════════════════════
          SCREEN 12 — task instructions
     ═══════════════════════════════════════════ -->
-    <div id="scr-instr" class="screen">
+    <section id="scr-instr" class="screen">
       <h2 id="instrTitle">Task instructions</h2>
       <div id="instrBody" class="subtitle"></div>
       <hr class="divider">
@@ -787,12 +788,12 @@
         <button id="btnInstrOk">I understand — continue</button>
         <button id="btnInstrBack" class="btn-ghost">Back</button>
       </div>
-    </div>
+    </section>
 
     <!-- ═══════════════════════════════════════════
          SCREEN 13 — microphone setup
     ═══════════════════════════════════════════ -->
-    <div id="scr-mic" class="screen">
+    <section id="scr-mic" class="screen">
       <h2 id="micTitle">Microphone setup</h2>
       <p id="micSubtitle" class="subtitle">Click <strong>Enable microphone</strong> and allow access when prompted by your browser. Then complete a short test recording before you begin.</p>
 
@@ -827,12 +828,12 @@
       </div>
 
       <p class="footnote" id="micFootnote">Use Chrome or Edge for best results. Microphone access is required to participate.</p>
-    </div>
+    </section>
 
     <!-- ═══════════════════════════════════════════
          SCREEN 14 — recording (run task)
     ═══════════════════════════════════════════ -->
-    <div id="scr-run" class="screen">
+    <section id="scr-run" class="screen">
 
       <div class="row" style="margin-bottom:12px">
         <span class="pill" id="runTaskLabel">Task —</span>
@@ -856,12 +857,12 @@
         <button id="btnRunGoMic" class="btn-ghost">Microphone setup</button>
       </div>
 
-    </div>
+    </section>
 
     <!-- ═══════════════════════════════════════════
          SCREEN 15 — task done
     ═══════════════════════════════════════════ -->
-    <div id="scr-done" class="screen">
+    <section id="scr-done" class="screen">
       <h2 id="doneTitle">Task complete ✓</h2>
       <p id="doneSummary" class="subtitle"></p>
 
@@ -877,7 +878,7 @@
       </div>
 
       <p class="footnote" id="doneFootnote">If any upload failed, the files were saved as local downloads instead.</p>
-    </div>
+    </section>
 
     </main>
 
@@ -885,7 +886,9 @@
          FOOTER
     ═══════════════════════════════════════════ -->
     <footer class="site-footer">
-      <a href="imprint.html" id="imprintLink">Impressum / Imprint</a>
+      <nav aria-label="Site links">
+        <a href="imprint.html" id="imprintLink">Impressum / Imprint</a>
+      </nav>
     </footer>
 
   </div><!-- /card -->
