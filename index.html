@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Speech Recording / Sprachaufnahme</title>
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 <div class="wrap">
@@ -17,7 +17,7 @@
       <h1 id="headerTitle">Speech Recording</h1>
       <img class="uni-logo"
            src="img/logo_uni_graz_4c.jpg"
-           alt="University of Graz" />
+           alt="University of Graz">
     </header>
 
     <main>
@@ -62,7 +62,7 @@
       </div>
 
       <div class="consent-check">
-        <input type="checkbox" id="consentChk" aria-required="true" />
+        <input type="checkbox" id="consentChk" aria-required="true">
         <label for="consentChk" id="consentChkLabel">
           I have read the information above and I consent to participate in this study.
         </label>
@@ -90,13 +90,13 @@
           <label for="de-pid" id="de-pid-label">Teilnehmer-ID <span class="req" aria-hidden="true">*</span></label>
           <input id="de-pid" type="text" autocomplete="off"
                  placeholder="Bitte geben Sie die Ihnen mitgeteilte ID ein"
-                 aria-required="true" aria-labelledby="de-pid-label" />
+                 aria-required="true" aria-labelledby="de-pid-label">
         </div>
 
         <div>
           <label for="de-birthYear" id="de-by-label">Geburtsjahr <span class="req" aria-hidden="true">*</span></label>
           <input id="de-birthYear" type="number" min="1900" max="2100"
-                 aria-required="true" aria-labelledby="de-by-label" />
+                 aria-required="true" aria-labelledby="de-by-label">
         </div>
 
         <div>
@@ -129,12 +129,12 @@
           <label for="de-city" id="de-city-label">Stadt / Ort, in dem Sie aufgewachsen sind <span class="req" aria-hidden="true">*</span></label>
           <input id="de-city" type="text" autocomplete="off"
                  placeholder="z. B. Graz"
-                 aria-required="true" aria-labelledby="de-city-label" />
+                 aria-required="true" aria-labelledby="de-city-label">
         </div>
 
       </div>
 
-      <hr class="divider" />
+      <hr class="divider">
 
       <div class="row">
         <button id="btnDeDetailsContinue" disabled>Weiter</button>
@@ -158,13 +158,13 @@
           <label for="en-pid" id="en-pid-label">Participant ID <span class="req" aria-hidden="true">*</span></label>
           <input id="en-pid" type="text" autocomplete="off"
                  placeholder="Enter the ID provided by the researcher"
-                 aria-required="true" aria-labelledby="en-pid-label" />
+                 aria-required="true" aria-labelledby="en-pid-label">
         </div>
 
         <div>
           <label for="en-birthYear" id="en-by-label">Year of birth <span class="req" aria-hidden="true">*</span></label>
           <input id="en-birthYear" type="number" min="1900" max="2100"
-                 aria-required="true" aria-labelledby="en-by-label" />
+                 aria-required="true" aria-labelledby="en-by-label">
         </div>
 
         <div>
@@ -197,12 +197,12 @@
           <label for="en-city" id="en-city-label">City / town you grew up in <span class="req" aria-hidden="true">*</span></label>
           <input id="en-city" type="text" autocomplete="off"
                  placeholder="e.g. Graz"
-                 aria-required="true" aria-labelledby="en-city-label" />
+                 aria-required="true" aria-labelledby="en-city-label">
         </div>
 
       </div>
 
-      <hr class="divider" />
+      <hr class="divider">
 
       <div class="row">
         <button id="btnEnDetailsContinue" disabled>Continue</button>
@@ -229,25 +229,25 @@
         <div class="grid-2">
           <div>
             <label for="arrivalYear">When did you come to Austria (year)?</label>
-            <input id="arrivalYear" type="number" min="1900" max="2100" />
+            <input id="arrivalYear" type="number" min="1900" max="2100">
           </div>
           <div>
             <label for="householdCount">How many people live in your household besides yourself?</label>
-            <input id="householdCount" type="number" min="0" />
+            <input id="householdCount" type="number" min="0">
           </div>
         </div>
         <div class="grid-3">
           <div>
             <label for="derivedAge">Age (calculated)</label>
-            <input id="derivedAge" disabled aria-label="Calculated age" />
+            <input id="derivedAge" disabled aria-label="Calculated age">
           </div>
           <div>
             <label for="derivedAgeMigration">Age at migration (calculated)</label>
-            <input id="derivedAgeMigration" disabled aria-label="Calculated age at migration" />
+            <input id="derivedAgeMigration" disabled aria-label="Calculated age at migration">
           </div>
           <div>
             <label for="derivedDuration">Duration in Austria (calculated)</label>
-            <input id="derivedDuration" disabled aria-label="Calculated duration in Austria" />
+            <input id="derivedDuration" disabled aria-label="Calculated duration in Austria">
           </div>
         </div>
       </div>
@@ -256,27 +256,27 @@
         <fieldset>
           <legend>Apart from Austria, have you ever lived in a country other than the UK for longer than 6 months?</legend>
           <div class="choice-inline">
-            <label><input type="radio" name="livedAbroad" value="1" /> Yes</label>
-            <label><input type="radio" name="livedAbroad" value="0" /> No</label>
+            <label><input type="radio" name="livedAbroad" value="1"> Yes</label>
+            <label><input type="radio" name="livedAbroad" value="0"> No</label>
           </div>
         </fieldset>
         <div id="livedAbroadDetails" class="hidden">
           <div class="grid-2">
             <div>
               <label for="abroadYears">Number of years</label>
-              <input id="abroadYears" type="number" min="0" step="0.5" />
+              <input id="abroadYears" type="number" min="0" step="0.5">
             </div>
             <div>
               <label for="abroadCountry">Country</label>
-              <input id="abroadCountry" />
+              <input id="abroadCountry">
             </div>
             <div>
               <label for="abroadFrom">From year</label>
-              <input id="abroadFrom" type="number" min="1900" max="2100" />
+              <input id="abroadFrom" type="number" min="1900" max="2100">
             </div>
             <div>
               <label for="abroadTo">To year</label>
-              <input id="abroadTo" type="number" min="1900" max="2100" />
+              <input id="abroadTo" type="number" min="1900" max="2100">
             </div>
           </div>
         </div>
@@ -286,14 +286,14 @@
         <fieldset>
           <legend>What language(s) did you acquire before starting primary school?</legend>
           <div class="checkbox-group">
-            <label><input type="checkbox" name="prePrimaryLang" value="English" /> English</label>
-            <label><input type="checkbox" name="prePrimaryLang" value="German" /> German</label>
-            <label><input type="checkbox" id="prePrimaryOtherChk" name="prePrimaryLang" value="Other" /> Other</label>
+            <label><input type="checkbox" name="prePrimaryLang" value="English"> English</label>
+            <label><input type="checkbox" name="prePrimaryLang" value="German"> German</label>
+            <label><input type="checkbox" id="prePrimaryOtherChk" name="prePrimaryLang" value="Other"> Other</label>
           </div>
         </fieldset>
         <div id="prePrimaryOtherWrap" class="hidden">
           <label for="prePrimaryOther">If other, please indicate which language(s)</label>
-          <input id="prePrimaryOther" />
+          <input id="prePrimaryOther">
         </div>
       </div>
 
@@ -315,8 +315,8 @@
         <fieldset>
           <legend>Did you attend any German classes before coming to Austria?</legend>
           <div class="choice-inline">
-            <label><input type="radio" name="germanBefore" value="1" /> Yes</label>
-            <label><input type="radio" name="germanBefore" value="0" /> No</label>
+            <label><input type="radio" name="germanBefore" value="1"> Yes</label>
+            <label><input type="radio" name="germanBefore" value="0"> No</label>
           </div>
         </fieldset>
         <div id="germanBeforeDetails" class="hidden">
@@ -331,7 +331,7 @@
             </div>
             <div>
               <label for="germanBeforeLastYear">When (year) did you last take these classes?</label>
-              <input id="germanBeforeLastYear" type="number" min="1900" max="2100" />
+              <input id="germanBeforeLastYear" type="number" min="1900" max="2100">
             </div>
           </div>
         </div>
@@ -341,8 +341,8 @@
         <fieldset>
           <legend>Did you attend any German classes in Austria?</legend>
           <div class="choice-inline">
-            <label><input type="radio" name="germanAustria" value="1" /> Yes</label>
-            <label><input type="radio" name="germanAustria" value="0" /> No</label>
+            <label><input type="radio" name="germanAustria" value="1"> Yes</label>
+            <label><input type="radio" name="germanAustria" value="0"> No</label>
           </div>
         </fieldset>
         <div id="germanAustriaDetails" class="hidden">
@@ -357,7 +357,7 @@
             </div>
             <div>
               <label for="germanAustriaLastYear">When (year) did you last take these classes?</label>
-              <input id="germanAustriaLastYear" type="number" min="1900" max="2100" />
+              <input id="germanAustriaLastYear" type="number" min="1900" max="2100">
             </div>
           </div>
         </div>
@@ -392,13 +392,13 @@
         <fieldset>
           <legend>Are you actively engaged in a British expatriate community in Austria?</legend>
           <div class="choice-inline">
-            <label><input type="radio" name="expatCommunity" value="1" /> Yes</label>
-            <label><input type="radio" name="expatCommunity" value="0" /> No</label>
+            <label><input type="radio" name="expatCommunity" value="1"> Yes</label>
+            <label><input type="radio" name="expatCommunity" value="0"> No</label>
           </div>
         </fieldset>
         <div id="expatDetails" class="hidden">
           <label for="expatSinceYear">If yes: since what year?</label>
-          <input id="expatSinceYear" type="number" min="1900" max="2100" />
+          <input id="expatSinceYear" type="number" min="1900" max="2100">
         </div>
       </div>
 
@@ -406,13 +406,13 @@
         <fieldset>
           <legend>Have you ever been back to the UK since leaving for Austria?</legend>
           <div class="choice-inline">
-            <label><input type="radio" name="backToUK" value="1" /> Yes</label>
-            <label><input type="radio" name="backToUK" value="0" /> No</label>
+            <label><input type="radio" name="backToUK" value="1"> Yes</label>
+            <label><input type="radio" name="backToUK" value="0"> No</label>
           </div>
         </fieldset>
         <div id="backToUKDetails" class="hidden">
           <label for="ukStayDuration">If yes: average duration of your stay(s) in the UK</label>
-          <input id="ukStayDuration" placeholder="e.g. two weeks / one month" />
+          <input id="ukStayDuration" placeholder="e.g. two weeks / one month">
         </div>
       </div>
 
@@ -434,9 +434,9 @@
         <fieldset>
           <legend>What languages do the people in your household speak?</legend>
           <div class="checkbox-group">
-            <label><input type="checkbox" id="hhSpeakEnglishChk" /> English</label>
-            <label><input type="checkbox" id="hhSpeakGermanChk" /> German</label>
-            <label><input type="checkbox" id="hhSpeakOtherChk" /> Other</label>
+            <label><input type="checkbox" id="hhSpeakEnglishChk"> English</label>
+            <label><input type="checkbox" id="hhSpeakGermanChk"> German</label>
+            <label><input type="checkbox" id="hhSpeakOtherChk"> Other</label>
           </div>
         </fieldset>
         <div class="grid-2">
@@ -463,7 +463,7 @@
           </div>
           <div class="hidden" id="hhOtherSpeakWrap">
             <label for="hhOtherSpeak">If other, please indicate</label>
-            <input id="hhOtherSpeak" />
+            <input id="hhOtherSpeak">
           </div>
         </div>
       </div>
@@ -479,7 +479,7 @@
         <div class="grid-2">
           <div class="hidden" id="hhYouToThemOtherWrap">
             <label for="hhYouToThemOther">If other, please indicate</label>
-            <input id="hhYouToThemOther" />
+            <input id="hhYouToThemOther">
           </div>
           <div class="hidden" id="hhYouToThemGermanWrap">
             <label for="hhYouToThemGermanVariety">If German, which variety?</label>
@@ -505,7 +505,7 @@
         <div class="grid-2">
           <div class="hidden" id="hhThemToYouOtherWrap">
             <label for="hhThemToYouOther">If other, please indicate</label>
-            <input id="hhThemToYouOther" />
+            <input id="hhThemToYouOther">
           </div>
           <div class="hidden" id="hhThemToYouEnglishWrap">
             <label for="hhThemToYouEnglishVariety">If English, which variety?</label>
@@ -535,8 +535,8 @@
         <fieldset>
           <legend>Do you have children?</legend>
           <div class="choice-inline">
-            <label><input type="radio" name="hasChildren" value="1" /> Yes</label>
-            <label><input type="radio" name="hasChildren" value="0" /> No</label>
+            <label><input type="radio" name="hasChildren" value="1"> Yes</label>
+            <label><input type="radio" name="hasChildren" value="0"> No</label>
           </div>
         </fieldset>
         <div id="childrenDetails" class="hidden">
@@ -545,8 +545,8 @@
               <fieldset>
                 <legend>Do they have English names?</legend>
                 <div class="choice-inline">
-                  <label><input type="radio" name="childEnglishNames" value="1" /> Yes</label>
-                  <label><input type="radio" name="childEnglishNames" value="0" /> No</label>
+                  <label><input type="radio" name="childEnglishNames" value="1"> Yes</label>
+                  <label><input type="radio" name="childEnglishNames" value="0"> No</label>
                 </div>
               </fieldset>
             </div>
@@ -554,8 +554,8 @@
               <fieldset>
                 <legend>Do they have German names?</legend>
                 <div class="choice-inline">
-                  <label><input type="radio" name="childGermanNames" value="1" /> Yes</label>
-                  <label><input type="radio" name="childGermanNames" value="0" /> No</label>
+                  <label><input type="radio" name="childGermanNames" value="1"> Yes</label>
+                  <label><input type="radio" name="childGermanNames" value="0"> No</label>
                 </div>
               </fieldset>
             </div>
@@ -563,15 +563,15 @@
               <fieldset>
                 <legend>Do they have other names?</legend>
                 <div class="choice-inline">
-                  <label><input type="radio" name="childOtherNames" value="1" /> Yes</label>
-                  <label><input type="radio" name="childOtherNames" value="0" /> No</label>
+                  <label><input type="radio" name="childOtherNames" value="1"> Yes</label>
+                  <label><input type="radio" name="childOtherNames" value="0"> No</label>
                 </div>
               </fieldset>
             </div>
           </div>
           <div id="childOtherNamesWrap" class="hidden">
             <label for="childOtherNamesText">If other names, please indicate</label>
-            <input id="childOtherNamesText" />
+            <input id="childOtherNamesText">
           </div>
         </div>
       </div>
@@ -594,10 +594,10 @@
         <fieldset>
           <legend>How frequently do you contact your relatives and friends in the UK?</legend>
           <div class="choice-inline">
-            <label><input type="radio" name="ukContactFreq" value="0" /> Never</label>
-            <label><input type="radio" name="ukContactFreq" value="33" /> Sometimes</label>
-            <label><input type="radio" name="ukContactFreq" value="66" /> Often</label>
-            <label><input type="radio" name="ukContactFreq" value="100" /> Very often</label>
+            <label><input type="radio" name="ukContactFreq" value="0"> Never</label>
+            <label><input type="radio" name="ukContactFreq" value="33"> Sometimes</label>
+            <label><input type="radio" name="ukContactFreq" value="66"> Often</label>
+            <label><input type="radio" name="ukContactFreq" value="100"> Very often</label>
           </div>
         </fieldset>
       </div>
@@ -612,13 +612,13 @@
         </select>
         <div id="ukContactLanguageOtherWrap" class="hidden">
           <label for="ukContactLanguageOther">If other, please indicate</label>
-          <input id="ukContactLanguageOther" />
+          <input id="ukContactLanguageOther">
         </div>
       </div>
 
       <div class="q-card">
         <label for="ukContactMethod">How do you primarily keep in touch with those relatives and friends?</label>
-        <input id="ukContactMethod" placeholder="e.g. phone, WhatsApp, video call, email" />
+        <input id="ukContactMethod" placeholder="e.g. phone, WhatsApp, video call, email">
       </div>
 
       <div class="row" style="margin-top:14px">
@@ -662,8 +662,8 @@
         <fieldset>
           <legend>Do you ever watch British television programmes?</legend>
           <div class="choice-inline">
-            <label><input type="radio" name="watchBritishTV" value="1" /> Yes</label>
-            <label><input type="radio" name="watchBritishTV" value="0" /> No</label>
+            <label><input type="radio" name="watchBritishTV" value="1"> Yes</label>
+            <label><input type="radio" name="watchBritishTV" value="0"> No</label>
           </div>
         </fieldset>
       </div>
@@ -671,8 +671,8 @@
         <fieldset>
           <legend>Do you ever listen to British radio programmes or podcasts?</legend>
           <div class="choice-inline">
-            <label><input type="radio" name="listenBritishRadio" value="1" /> Yes</label>
-            <label><input type="radio" name="listenBritishRadio" value="0" /> No</label>
+            <label><input type="radio" name="listenBritishRadio" value="1"> Yes</label>
+            <label><input type="radio" name="listenBritishRadio" value="0"> No</label>
           </div>
         </fieldset>
       </div>
@@ -680,8 +680,8 @@
         <fieldset>
           <legend>Do you ever read British newspapers, books or magazines?</legend>
           <div class="choice-inline">
-            <label><input type="radio" name="readBritishMedia" value="1" /> Yes</label>
-            <label><input type="radio" name="readBritishMedia" value="0" /> No</label>
+            <label><input type="radio" name="readBritishMedia" value="1"> Yes</label>
+            <label><input type="radio" name="readBritishMedia" value="0"> No</label>
           </div>
         </fieldset>
       </div>
@@ -689,8 +689,8 @@
         <fieldset>
           <legend>Do you ever listen to Austrian radio programmes or podcasts?</legend>
           <div class="choice-inline">
-            <label><input type="radio" name="listenAustrianRadio" value="1" /> Yes</label>
-            <label><input type="radio" name="listenAustrianRadio" value="0" /> No</label>
+            <label><input type="radio" name="listenAustrianRadio" value="1"> Yes</label>
+            <label><input type="radio" name="listenAustrianRadio" value="0"> No</label>
           </div>
         </fieldset>
       </div>
@@ -715,18 +715,18 @@
         <fieldset>
           <legend>Do your friends and family comment on your English?</legend>
           <div class="choice-inline">
-            <label><input type="radio" name="othersCommentEnglish" value="1" /> Yes</label>
-            <label><input type="radio" name="othersCommentEnglish" value="0" /> No</label>
+            <label><input type="radio" name="othersCommentEnglish" value="1"> Yes</label>
+            <label><input type="radio" name="othersCommentEnglish" value="0"> No</label>
           </div>
         </fieldset>
         <div id="othersCommentDetails" class="hidden">
           <div class="checkbox-group">
-            <label><input type="checkbox" id="commentAccent" /> Accent</label>
-            <label><input type="checkbox" id="commentSounds" /> Sounds</label>
-            <label><input type="checkbox" id="commentWords" /> Words</label>
-            <label><input type="checkbox" id="commentWordOrder" /> Word order</label>
-            <label><input type="checkbox" id="commentPitch" /> Pitch</label>
-            <label><input type="checkbox" id="commentGrammar" /> Grammar</label>
+            <label><input type="checkbox" id="commentAccent"> Accent</label>
+            <label><input type="checkbox" id="commentSounds"> Sounds</label>
+            <label><input type="checkbox" id="commentWords"> Words</label>
+            <label><input type="checkbox" id="commentWordOrder"> Word order</label>
+            <label><input type="checkbox" id="commentPitch"> Pitch</label>
+            <label><input type="checkbox" id="commentGrammar"> Grammar</label>
           </div>
         </div>
       </div>
@@ -735,18 +735,18 @@
         <fieldset>
           <legend>Would you say that your English has changed?</legend>
           <div class="choice-inline">
-            <label><input type="radio" name="englishChanged" value="1" /> Yes</label>
-            <label><input type="radio" name="englishChanged" value="0" /> No</label>
+            <label><input type="radio" name="englishChanged" value="1"> Yes</label>
+            <label><input type="radio" name="englishChanged" value="0"> No</label>
           </div>
         </fieldset>
         <div id="englishChangedDetails" class="hidden">
           <div class="checkbox-group">
-            <label><input type="checkbox" id="changedAccent" /> Accent</label>
-            <label><input type="checkbox" id="changedSounds" /> Sounds</label>
-            <label><input type="checkbox" id="changedWords" /> Words</label>
-            <label><input type="checkbox" id="changedWordOrder" /> Word order</label>
-            <label><input type="checkbox" id="changedPitch" /> Pitch</label>
-            <label><input type="checkbox" id="changedGrammar" /> Grammar</label>
+            <label><input type="checkbox" id="changedAccent"> Accent</label>
+            <label><input type="checkbox" id="changedSounds"> Sounds</label>
+            <label><input type="checkbox" id="changedWords"> Words</label>
+            <label><input type="checkbox" id="changedWordOrder"> Word order</label>
+            <label><input type="checkbox" id="changedPitch"> Pitch</label>
+            <label><input type="checkbox" id="changedGrammar"> Grammar</label>
           </div>
         </div>
       </div>
@@ -782,9 +782,9 @@
     <div id="scr-instr" class="screen">
       <h2 id="instrTitle">Task instructions</h2>
       <div id="instrBody" class="subtitle"></div>
-      <hr class="divider" />
+      <hr class="divider">
       <div class="row">
-        <button id="btnInstrOk" id="instrOkBtn">I understand — continue</button>
+        <button id="btnInstrOk">I understand — continue</button>
         <button id="btnInstrBack" class="btn-ghost">Back</button>
       </div>
     </div>
@@ -865,7 +865,7 @@
       <h2 id="doneTitle">Task complete ✓</h2>
       <p id="doneSummary" class="subtitle"></p>
 
-      <hr class="divider" />
+      <hr class="divider">
 
       <div id="doneBackRow">
         <p id="doneBackMsg"><strong>You still need to complete the other task.</strong> Click below to go back and start it.</p>
