@@ -1,4 +1,21 @@
 /* ═══════════════════════════════════════════
+   SKIP LINK
+═══════════════════════════════════════════ */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  background: var(--uni-yellow);
+  color: var(--uni-black);
+  font-weight: 700;
+  padding: 10px 16px;
+  text-decoration: none;
+  z-index: 10000;
+  transition: top .15s;
+}
+.skip-link:focus { top: 0; }
+
+/* ═══════════════════════════════════════════
    COLOUR TOKENS
 ═══════════════════════════════════════════ */
 :root {
