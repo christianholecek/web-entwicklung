@@ -55,8 +55,8 @@ Each task item contains the information needed to display one recording prompt. 
 | `key`                   | Internal vowel or item label                       |
 | `targetToken`           | Target word or nonce word shown to the participant |
 | `primes`                | List of rhyming prime words                        |
-| `sentence` or `carrier` | Carrier sentence shown on the recording screen     |
-| `language`              | Task language                                      |
+| `carriers`              | Carrier sentence templates shown on the recording screen |
+| `lang`                  | Task language code                             |
 | `type`                  | Task type, such as rhyming, rating, or reading     |
 
 The task data includes a `type` field so that future task types can be added without restructuring the whole application. The current final website implements the rhyming recording tasks. Additional types such as rating tasks or reading passages are planned as possible extensions.
