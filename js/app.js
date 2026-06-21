@@ -3195,26 +3195,27 @@
      CONFETTI 🎉
   ═══════════════════════════════════════════ */
   function launchConfetti() {
-    // Respect reduced motion preference
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const pieces  = ["🎉", "🎊", "✨", "⭐", "🌟", "🎈", "💛", "🌈"];
-    const count   = 60;
-    const container = $("#confettiContainer") || document.body;
+  const pieces = ["🎉", "🎊", "✨", "⭐", "🌟", "🎈", "💛", "🌈", "🌈"];
+  const count = 60;
+  const container = $("#confettiContainer") || document.body;
 
-    for (let i = 0; i < count; i++) {
-      const el = document.createElement("span");
-      el.className   = "confetti-piece";
-      el.textContent = pieces[Math.floor(Math.random() * pieces.length)];
-      el.style.left               = (Math.random() * 100) + "vw";
-      el.style.fontSize           = (14 + Math.random() * 22) + "px";
-      el.style.animationDuration  = (1.8 + Math.random() * 2.4) + "s";
-      el.style.animationDelay     = (Math.random() * 2.5) + "s";
-      container.appendChild(el);
-      el.addEventListener("animationend", () => el.remove());
-    }
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement("span");
+
+    el.className = "confetti-piece";
+    el.setAttribute("aria-hidden", "true");
+    el.textContent = pieces[Math.floor(Math.random() * pieces.length)];
+    el.style.left = (Math.random() * 100) + "vw";
+    el.style.fontSize = (14 + Math.random() * 22) + "px";
+    el.style.animationDuration = (1.8 + Math.random() * 2.4) + "s";
+    el.style.animationDelay = (Math.random() * 2.5) + "s";
+
+    container.appendChild(el);
+    el.addEventListener("animationend", () => el.remove());
   }
-
+}
   /* ═══════════════════════════════════════════
      INIT — load tasks then wait for user
   ═══════════════════════════════════════════ */
