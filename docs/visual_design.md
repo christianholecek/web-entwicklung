@@ -1,129 +1,189 @@
-# visual-design.md
+# Visual design documentation
 
-## Design Goals
+## Design goals
 
-The interface is designed to guide non-technical research participants through the recording process as clearly and effortlessly as possible. Every screen has a single focus — one decision or one action at a time. University of Graz branding (yellow accent, black text, white background) is used throughout to signal institutional trust. Clarity and simplicity take priority over visual complexity.
+The interface is designed to guide non-technical research participants through a speech recording task as clearly and calmly as possible. Each screen focuses on one decision or one action at a time. This reduces cognitive load and helps participants understand what they need to do next.
+
+The visual design uses University of Graz branding to signal that the tool belongs to an institutional research context. Clarity and usability are more important than visual complexity.
 
 ---
 
 ## Branding
 
-- **Institution:** Universität Graz
-- **Logo:** Stored locally in `img/logo_uni_graz_4c.jpg` — displayed top right on every screen
-- **Primary accent:** `#ffd500` (Uni Graz yellow)
-- **Primary text:** `#000000` (black)
-- **Background:** `#ffffff` (white)
+* **Institution:** Universität Graz
+* **Logo:** stored locally in `img/logo_uni_graz_4c.jpg`
+* **Primary accent colour:** `#ffd500`, based on University of Graz yellow
+* **Primary text colour:** black
+* **Main background:** white
+
+The logo is loaded locally so that the website works reliably on GitHub Pages and does not depend on an external university server.
 
 ---
 
-## Colour Palette
+## Colour palette
 
-| Variable | Value | Usage |
-|---|---|---|
-| `--uni-yellow` | `#ffd500` | Primary buttons, hover highlights, scroll dot |
-| `--uni-black` | `#000000` | Headings, body text, button text |
-| `--white` | `#ffffff` | Page and card background |
-| `--muted` | `#444444` | Subtitle text, hints, footnotes |
-| `--border` | `#e6e6e6` | Card borders, input borders, dividers |
-| `--pill-bg` | `#f7f7f7` | Pills, ghost buttons, card backgrounds, consent box |
-| `--shadow` | `0 10px 30px rgba(0,0,0,.08)` | Card drop shadow |
+| Variable       | Value                         | Usage                                               |
+| -------------- | ----------------------------- | --------------------------------------------------- |
+| `--uni-yellow` | `#ffd500`                     | Primary buttons, hover highlights, accent elements  |
+| `--uni-black`  | `#000000`                     | Headings, body text, button text                    |
+| `--white`      | `#ffffff`                     | Page and card background                            |
+| `--muted`      | `#444444`                     | Subtitle text, hints, supporting text               |
+| `--border`     | `#e6e6e6`                     | Card borders, input borders, dividers               |
+| `--pill-bg`    | `#f7f7f7`                     | Pills, ghost buttons, card backgrounds, consent box |
+| `--shadow`     | `0 10px 30px rgba(0,0,0,.08)` | Card drop shadow                                    |
 
-All colours are defined as CSS custom properties in `:root` for easy global changes.
+The palette is deliberately simple. Black text on white or pale grey backgrounds supports readability, while yellow is used as an institutional accent and for important action buttons.
 
 ---
 
 ## Layout
 
-- **Max width:** 920px, centred with `margin: 0 auto`
-- **Outer padding:** 24px
-- **Single card:** All content lives inside one `.card` div with 16px border radius, light border, and soft shadow
-- **Single page:** All screens are `<div class="screen">` elements — only the active one has `display: block`; the rest are hidden with `display: none`
-- **Shared header:** Logo and title visible on every screen, separated from content by a bottom border
+The project uses a centred single-card layout.
+
+* **Maximum width:** approximately 920px
+* **Outer spacing:** generous desktop padding with reduced spacing on smaller screens
+* **Main card:** rounded corners, light border, and subtle shadow
+* **Single-page flow:** screens are shown and hidden dynamically
+* **Shared header:** the site title and University of Graz logo remain visually consistent across screens
+
+The single-card layout was chosen because the application is a guided task rather than a content-heavy website. Keeping all actions inside the same visual frame helps participants understand that they are moving through one coherent process.
+
+---
+
+## File structure and styling
+
+The final version separates structure, styling, functionality, and task data.
+
+| File or folder   | Purpose                                   |
+| ---------------- | ----------------------------------------- |
+| `index.html`     | Main semantic HTML structure              |
+| `css/styles.css` | Visual styling and responsive rules       |
+| `js/app.js`      | JavaScript functionality and screen logic |
+| `data/`          | JSON task and stimulus data               |
+| `img/`           | Local image assets                        |
+| `imprint.html`   | Imprint page                              |
+
+The CSS is stored in `css/styles.css`, not embedded in the HTML. This keeps the HTML cleaner and makes the design easier to maintain.
 
 ---
 
 ## Typography
 
-- **Font stack:** `Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial`
-- **h1:** 22px (site title in header)
-- **h2:** 20px (screen titles)
-- **h3:** 17px (card titles)
-- **Body:** 16px, line-height 1.5
-- **Prompt text** (sentence to read aloud): 38px, centred — large enough to read at a glance while speaking
-- **Footnotes:** 12px, muted colour
+The font stack uses system fonts for reliability and fast loading.
+
+* **Font stack:** `Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial`
+* **Main title:** compact and prominent in the shared header
+* **Screen headings:** clear and descriptive
+* **Body text:** readable size and line height
+* **Recording prompt:** large, centred, and easy to read aloud
+* **Footnotes and hints:** smaller and visually muted
+
+The recording prompt is intentionally large because participants need to read it quickly while speaking.
 
 ---
 
 ## Components
 
 ### Buttons
-- **Primary:** Yellow background, black bold text, 10px border radius
-- **Ghost:** Light grey background (`--pill-bg`), normal weight — used for secondary actions (Back, Stop, etc.)
-- **Disabled:** `opacity: 0.45`, `cursor: not-allowed`
 
-### Pills / Status badges
-- Rounded (border-radius 999px), light background, 13px text
-- Used for status indicators (e.g. "Item 3 / 22", "Microphone: not started")
+Primary buttons use the University of Graz yellow accent with black bold text. Secondary actions use a lighter ghost-button style. Disabled buttons are visually muted so that participants can see which actions are not available yet.
 
-### Group selection cards (Screen 0)
-- Two-column grid, large flag emoji, label, and subtitle
-- Border highlights yellow on hover
+### Status pills
 
-### Task selection cards (Screen 4)
-- Two-column grid on desktop, single column on mobile (breakpoint: 560px)
-- Completed tasks will show a yellow done badge
+Rounded status pills are used for information such as recording progress, microphone state, and item count. Their compact shape makes status information visible without dominating the screen.
 
-### Consent scroll box (Screen 1)
-- Fixed max-height (300px) with always-visible scrollbar
-- Scroll hint indicator with yellow dot below the box
-- Custom scrollbar styling for WebKit browsers
+### Group selection cards
 
-### Participant details grid (Screen 2)
-- Two-column grid for form fields
-- Participant ID spans full width
-- Collapses to single column below 520px
+The first screen uses large selection cards for the two participant groups. The cards are designed to be visually clear and usable with mouse, touch, and keyboard input.
 
-### Recording prompt (Screen 7)
-- 38px centred text — designed for readability while speaking
-- Prime words displayed as rounded pills above the sentence
+### Task selection cards
+
+The task selection screen shows the available tasks as cards. Completed tasks are visually marked so participants know which parts of the session are already done.
+
+### Consent box
+
+The consent text is shown in a scrollable box. This keeps the screen manageable while still allowing the full information text to be available before participants continue.
+
+### Participant details form
+
+The participant details form uses a two-column layout on larger screens and collapses to a single column on smaller screens. Labels are connected to their inputs, and related options are grouped semantically.
+
+### Recording screen
+
+The recording screen is intentionally minimal. It shows the current item, the prime words, the carrier sentence, and the recording controls. The prompt text is large and centred to support reading aloud.
 
 ### Upload overlay
-- Full-screen semi-transparent white backdrop
-- Centred spinner + message — prevents interaction during upload
+
+The upload overlay prevents participants from interacting with the task while data are being saved. This avoids accidental clicks during upload and makes the system state clear.
 
 ---
 
-## Screen Navigation Flow
+## Screen navigation flow
 
-```
+```text
 Screen 0: Group selection
   → Screen 1: Consent
     → Screen 2: Participant details
-      → Screen 3: Questionnaire
+      → Screen 3: Questionnaire, for English-speaking participants
         → Screen 4: Task selection
           → Screen 5: Task instructions
-            → Screen 6: Mic setup
+            → Screen 6: Microphone setup
               → Screen 7: Recording
-                → Screen 8: Done → back to Screen 4
+                → Screen 8: Done
+                  → back to Screen 4 until both tasks are complete
 ```
 
----
-
-## Responsive Behaviour
-
-- Group grid, task grid: 2 columns → 1 column below 520–560px
-- Details grid: 2 columns → 1 column below 520px
-- Mobile testing and refinements planned for a later milestone
+The flow is linear during each task but returns participants to the task selection screen after one task is completed. This makes it clear that both tasks need to be completed.
 
 ---
 
-## Design Decisions
+## Responsive behaviour
 
-| Decision | Reason |
-|---|---|
-| All CSS embedded in `index.html` | Keeps the tool as a single self-contained file |
-| CSS custom properties for colours | Easy to update globally; consistent across all components |
-| 38px prompt font size | Participants must read at a glance while speaking — legibility is critical |
-| No dark mode | Simplicity; not needed for a controlled research setting |
-| Logo stored locally in `img/` | Avoids dependency on university server; works offline and on GitHub Pages |
-| Disabled buttons until conditions met | Prevents user errors (e.g. skipping consent, starting without mic test) |
+The design uses a responsive strategy with several breakpoints. The base layout is fluid, and smaller screens receive adjusted spacing, reduced padding, and single-column layouts.
+
+Main responsive decisions:
+
+* group selection cards collapse from two columns to one column
+* task cards collapse from two columns to one column
+* participant detail fields collapse from two columns to one column
+* the shared header adapts on narrow screens
+* buttons and inputs remain large enough for touch use
+* prompt text remains readable on mobile screens
+* spacing is reduced on narrow screens to avoid excessive scrolling
+
+This means the final website is usable on desktop, tablet, and mobile screens.
+
+---
+
+## Accessibility-related design decisions
+
+Accessibility was considered as part of the visual and interaction design.
+
+* Strong text contrast is used throughout the interface.
+* Yellow is used as an accent but not as the only source of meaning.
+* Focus styles are visible for keyboard users.
+* Interactive cards can be operated with keyboard input.
+* Forms use labels, fieldsets, and legends.
+* Buttons and inputs use large touch targets.
+* Status messages use live regions where appropriate.
+* Decorative confetti and spinner animations respect reduced-motion preferences.
+* A skip link is provided to help users bypass repeated content.
+
+These decisions support the selected WCAG 2.1 AA criteria documented in the project requirements.
+
+---
+
+## Design decisions
+
+| Decision                                    | Reason                                                              |
+| ------------------------------------------- | ------------------------------------------------------------------- |
+| Single-card interface                       | Keeps the guided task visually coherent                             |
+| External CSS file                           | Separates content from presentation and improves maintainability    |
+| CSS custom properties                       | Allows consistent colours and easier global changes                 |
+| University of Graz yellow accent            | Connects the interface to the institutional context                 |
+| Large recording prompt                      | Supports readability while speaking                                 |
+| Disabled buttons until requirements are met | Prevents common user errors                                         |
+| Bilingual interface in one app              | Avoids maintaining two separate websites                            |
+| Local logo asset                            | Makes the site reliable on GitHub Pages                             |
+| Reduced-motion support                      | Avoids forcing decorative animation on users who prefer less motion |
+| Responsive card and form layouts            | Keeps the tool usable on smaller screens                            |
