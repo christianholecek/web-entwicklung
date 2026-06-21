@@ -10,7 +10,7 @@
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
 <div class="wrap">
-  <article class="card" aria-labelledby="headerTitle">
+  <div class="card">
 
     <!-- ═══════════════════════════════════════════
          SHARED HEADER (visible on all screens)
@@ -23,6 +23,8 @@
     </header>
 
     <main id="main-content">
+  <article class="app-flow" aria-labelledby="appFlowTitle">
+    <h2 id="appFlowTitle" class="visually-hidden">Speech recording workflow / Ablauf der Sprachaufnahme</h2>
     <!-- ═══════════════════════════════════════════
          SCREEN 0 — group selection
     ═══════════════════════════════════════════ -->
@@ -834,7 +836,7 @@
     <!-- ═══════════════════════════════════════════
          SCREEN 14 — recording (run task)
     ═══════════════════════════════════════════ -->
-    <section id="scr-run" class="screen">
+    <div id="scr-run" class="screen">
 
       <div class="row" style="margin-bottom:12px">
         <span class="pill" id="runTaskLabel">Task —</span>
@@ -858,7 +860,7 @@
         <button id="btnRunGoMic" class="btn-ghost">Microphone setup</button>
       </div>
 
-    </section>
+    </div>
 
     <!-- ═══════════════════════════════════════════
          SCREEN 15 — task done
@@ -880,7 +882,7 @@
 
       <p class="footnote" id="doneFootnote">If any upload failed, the files were saved as local downloads instead.</p>
     </section>
-
+      </article>
     </main>
 
     <!-- ═══════════════════════════════════════════
@@ -892,7 +894,7 @@
       </nav>
     </footer>
 
-  </article><!-- /card -->
+  </div><!-- /card -->
 </div><!-- /wrap -->
 
 <!-- UPLOAD OVERLAY -->
