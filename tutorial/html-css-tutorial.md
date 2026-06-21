@@ -1,5 +1,19 @@
 # HTML & CSS Tutorial — Speech Recording Tool
 
+This tutorial explains the main HTML and CSS structure of the speech recording tool.
+
+The relevant files are:
+
+```text
+index.html
+css/styles.css
+```
+
+The HTML file contains the structure of the page. It defines the screens, headings, forms, buttons, links, and accessibility landmarks.
+
+The CSS file controls the appearance of the page. It defines the layout, colours, typography, responsive breakpoints, focus styles, cards, buttons, forms, upload overlay, and final confetti animation.
+
+---
 
 ## Part 1 — The document shell
 
@@ -7,115 +21,278 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Speech Recording Tool</title>
+  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Speech Recording / Sprachaufnahme</title>
+
+  <meta name="description" content="A browser-based bilingual speech recording tool for phonetic research, developed for a web design project at the University of Graz.">
+
+  <link rel="stylesheet" href="css/styles.css">
+</head>
 ```
 
-**`<!doctype html>`**
-This must be the very first line of every HTML file. It tells the browser "this is a modern HTML5 document". Without it, browsers enter a mode called "quirks mode" where they render things inconsistently across different browsers.
+`<!doctype html>` must be the first line of a modern HTML document. It tells the browser to use modern HTML5 rendering.
 
-**`<html lang="en">`**
-The root element that wraps the entire page. The `lang="en"` attribute tells the browser and screen readers what language the page is in — this matters for accessibility and browser spellcheck. The default is set to `"en"` (English) because Screen 0, the first thing participants see, is displayed in English for both groups. Once the participant selects their group, JavaScript updates this attribute automatically: if they pick the German group, JavaScript runs `document.documentElement.lang = "de"`, switching the declared language to German for the rest of the session.
+`<html lang="en">` is the root element of the page. The `lang` attribute tells browsers and screen readers which language the page is in. The page starts in English because the first screen is bilingual and the final language is set after the participant selects their group.
 
-**`<meta charset="utf-8">`**
-Sets the character encoding. UTF-8 supports all characters including German umlauts (ä, ö, ü, ß) and flag emojis (🇦🇹 🇬🇧). Without this, special characters can show up as garbled symbols.
+`<meta charset="utf-8">` sets the character encoding to UTF-8. This is important because the project uses German characters such as ä, ö, ü, and ß, as well as emoji flags and confetti symbols.
 
-**`<meta name="viewport" content="width=device-width, initial-scale=1">`**
-This is what makes the page not look tiny on mobile screens. `width=device-width` tells the browser to use the actual screen width instead of pretending it's a desktop. `initial-scale=1` means don't zoom in or out by default.
+`<meta name="viewport" content="width=device-width, initial-scale=1">` makes the page scale correctly on mobile devices. Without this line, mobile browsers may render the page as if it were a desktop website and then shrink it down.
 
-**`<title>Speech Recording Tool</title>`**
-Sets the text shown in the browser tab. Not visible on the page itself.
+`<title>` sets the text shown in the browser tab.
+
+`<meta name="description">` gives a short description of the page. This was added because the assignment explicitly requires a meta description.
+
+`<link rel="stylesheet" href="css/styles.css">` connects the HTML file to the external CSS file. The styling is not embedded directly in the HTML.
 
 ---
 
-## Part 2 — CSS custom properties (colour tokens)
+## Part 2 — Skip link
+
+```html
+<a class="skip-link" href="#main-content">Skip to main content</a>
+```
+
+The skip link is the first interactive element on the page. It lets keyboard users skip directly to the main content instead of tabbing through repeated header elements.
+
+The matching CSS is:
+
+```css
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  background: var(--uni-yellow);
+  color: var(--uni-black);
+  font-weight: 700;
+  padding: 10px 16px;
+  text-decoration: none;
+  z-index: 10000;
+  transition: top .15s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+```
+
+The link is normally moved above the visible page with `top: -100px`.
+
+When it receives keyboard focus, `top: 0` moves it into view.
+
+This is an accessibility feature related to bypassing repeated content.
+
+---
+
+## Part 3 — Visually hidden text
+
+```css
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+```
+
+The `.visually-hidden` class hides text visually while keeping it available to screen readers.
+
+This is useful when a heading is needed for semantic structure but should not be visible in the interface.
+
+For example, the main app flow can have a hidden heading:
+
+```html
+<article class="app-flow" aria-labelledby="appFlowTitle">
+  <h2 id="appFlowTitle" class="visually-hidden">
+    Speech recording workflow / Ablauf der Sprachaufnahme
+  </h2>
+</article>
+```
+
+This improves structure without adding extra visible text to the design.
+
+---
+
+## Part 4 — Colour tokens
 
 ```css
 :root {
   --uni-yellow: #ffd500;
-  --uni-black:  #000000;
-  --white:      #ffffff;
-  --muted:      #444444;
-  --border:     #e6e6e6;
-  --pill-bg:    #f7f7f7;
-  --shadow:     0 10px 30px rgba(0,0,0,.08);
+  --uni-black: #000000;
+  --white: #ffffff;
+  --muted: #444444;
+  --border: #e6e6e6;
+  --pill-bg: #f7f7f7;
+  --shadow: 0 10px 30px rgba(0,0,0,.08);
+  --radius-card: 16px;
+  --radius-input: 10px;
 }
 ```
 
-CSS custom properties (also called CSS variables) let you define a value once and reuse it everywhere. They always start with `--` and are defined inside `:root`, which targets the `<html>` element — the highest level of the page, so the variables are available everywhere.
+CSS custom properties are also called CSS variables. They start with `--`.
 
-You reference them with `var(--name)`. For example `background: var(--uni-yellow)` uses the yellow colour defined above.
+The variables are defined in `:root`, which means they are available throughout the whole CSS file.
 
-**Why this matters:** If you want to change the yellow to a different colour, you change it in one place here and every button, dot, and highlight updates automatically. Without variables you would have to find and change every single occurrence of `#ffd500` throughout the file.
+For example:
 
-**`rgba(0,0,0,.08)`** is a colour in Red/Green/Blue/Alpha format. The `.08` at the end is opacity — 8% opaque black, which creates a very soft shadow.
+```css
+background: var(--uni-yellow);
+```
+
+uses the yellow value defined at the top.
+
+This makes the design easier to maintain. If the accent colour changes, it only needs to be changed once.
+
+The project uses University of Graz yellow as the main accent colour, with black text and white or pale grey backgrounds.
 
 ---
 
-## Part 3 — Reset and base styles
+## Part 5 — Reset and base styles
 
 ```css
-*, *::before, *::after { box-sizing: border-box; }
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 html, body {
   margin: 0;
   padding: 0;
   background: var(--white);
   color: var(--uni-black);
-  font-family: Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   font-size: 16px;
   line-height: 1.5;
 }
 ```
 
-**`*, *::before, *::after { box-sizing: border-box; }`**
-The `*` selector targets every single element on the page. `box-sizing: border-box` changes how width is calculated: by default, `width: 100%` means the content is 100% wide and padding is added on top, which can cause elements to overflow their container. With `border-box`, padding is included inside the width — so `width: 100%` always means exactly 100% of the container. `::before` and `::after` are pseudo-elements (decorative content added via CSS) — they get the same rule.
+`*` targets every element on the page.
 
-**`margin: 0; padding: 0`** on `html, body`: Browsers add their own default margins to the `<body>` element. This removes them so the page starts flush at the edges.
+`box-sizing: border-box` changes how element width is calculated. With this setting, padding and borders are included inside the element width. This helps prevent accidental horizontal overflow.
 
-**`font-family: Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial`** is a font stack. The browser tries each font left to right and uses the first one it finds installed. Inter is a modern clean font; the rest are system fallbacks that look good on Windows, Mac, and Linux.
+`margin: 0` and `padding: 0` remove the browser’s default spacing around the page.
 
-**`line-height: 1.5`** sets the spacing between lines of text to 1.5 times the font size — more readable than the default.
+The font stack uses `Inter` first, then system fonts as fallbacks. This keeps the design clean and avoids requiring a custom font file.
+
+`line-height: 1.5` improves readability by giving text enough vertical spacing.
 
 ---
 
-## Part 4 — Layout: wrap and card
+## Part 6 — Main layout
+
+```html
+<div class="wrap">
+  <div class="card">
+    ...
+  </div>
+</div>
+```
+
+The outer page layout is controlled by `.wrap` and `.card`.
 
 ```css
 .wrap {
   max-width: 920px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 24px 16px;
 }
+
 .card {
   background: var(--white);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--radius-card);
   box-shadow: var(--shadow);
   padding: 28px;
 }
 ```
 
-**`.wrap`** is the outer container. `max-width: 920px` means the content never gets wider than 920px even on large monitors. `margin: 0 auto` is the classic CSS centering trick — `0` for top/bottom margin, `auto` for left/right, which splits the remaining space equally on both sides. `padding: 24px` adds breathing room between the content and the screen edges.
+`.wrap` centres the content and prevents it from becoming too wide on large screens.
 
-**`.card`** is the white box that contains everything.
-- `border: 1px solid var(--border)` — a thin light grey border. `1px solid` is the most common border shorthand: thickness, style, colour.
-- `border-radius: 16px` — rounds all four corners by 16 pixels.
-- `box-shadow: var(--shadow)` — the shadow value is `0 10px 30px rgba(0,0,0,.08)`. The four values are: horizontal offset (0 = centred), vertical offset (10px downward), blur radius (30px = soft), colour (8% black = very subtle).
-- `padding: 28px` — space inside the card between the border and the content.
+`margin: 0 auto` centres the wrapper horizontally.
+
+`.card` creates the main white content box. It uses a border, rounded corners, and a soft shadow.
+
+The interface is a guided recording task, so a single-card layout helps participants understand that they are moving through one coherent process.
 
 ---
 
-## Part 5 — The shared header
+## Part 7 — Responsive layout for small screens
+
+```css
+@media (max-width: 600px) {
+  .card {
+    padding: 18px 14px;
+  }
+
+  .wrap {
+    padding: 12px 10px;
+  }
+}
+```
+
+This media query applies only when the screen is 600px wide or narrower.
+
+On smaller screens, the card and wrapper padding are reduced. This gives the content more available space on mobile devices.
+
+This is part of the responsive design strategy. The page keeps the same overall structure, but spacing and grids adapt to smaller screens.
+
+---
+
+## Part 8 — Semantic page structure
+
+The final HTML uses semantic landmarks:
 
 ```html
-<div class="site-header">
-  <h1>Speech Recording</h1>
-  <img class="uni-logo"
-       src="img/logo_uni_graz_4c.jpg"
-       alt="University of Graz" />
-</div>
+<header class="site-header">
+  ...
+</header>
+
+<main id="main-content">
+  <article class="app-flow" aria-labelledby="appFlowTitle">
+    ...
+  </article>
+</main>
+
+<footer class="site-footer">
+  ...
+</footer>
 ```
+
+`<header>` contains the site title and logo.
+
+`<main>` contains the main interactive content of the page.
+
+`<article>` wraps the speech recording workflow as one self-contained application.
+
+`<footer>` contains the imprint link.
+
+This semantic structure helps browsers, screen readers, validators, and humans understand the page.
+
+---
+
+## Part 9 — Shared header
+
+```html
+<header class="site-header">
+  <h1 id="headerTitle">Speech Recording</h1>
+
+  <img
+    class="uni-logo"
+    src="img/logo_uni_graz_4c.jpg"
+    alt="University of Graz"
+  >
+</header>
+```
+
+The header appears above the app screens.
+
+It contains the only visible `<h1>` on the page and the University of Graz logo.
 
 ```css
 .site-header {
@@ -126,127 +303,376 @@ The `*` selector targets every single element on the page. `box-sizing: border-b
   padding-bottom: 16px;
   border-bottom: 1px solid var(--border);
 }
-.site-header h1 { margin: 0; font-size: 22px; }
-.uni-logo { height: 40px; width: auto; border-radius: 6px; }
+
+.site-header h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.uni-logo {
+  height: 40px;
+  width: auto;
+  border-radius: 6px;
+}
 ```
 
-The header is visible on every screen — it contains the site title and the University of Graz logo.
+`display: flex` places the title and logo in one row.
 
-**`display: flex`** activates Flexbox layout. Flex makes the direct children (here: `<h1>` and `<img>`) sit side by side in a row automatically.
+`justify-content: space-between` pushes the title to the left and the logo to the right.
 
-**`justify-content: space-between`** pushes the first child to the left and the last child to the right, with all available space between them. This is how the title ends up on the left and the logo on the right.
+`align-items: center` aligns both vertically.
 
-**`align-items: center`** vertically centres both children within the header.
-
-**`border-bottom: 1px solid var(--border)`** draws a thin line under the header to visually separate it from the screen content below.
-
-**`<img src="img/logo_uni_graz_4c.jpg" alt="University of Graz">`** loads the logo from the local `img/` folder. The `alt` attribute provides a text description for screen readers and also shows as text if the image fails to load. `width: auto` on the image means the width adjusts automatically to maintain the correct proportions when only the height is fixed.
+The logo uses `alt="University of Graz"` so screen readers can identify it.
 
 ---
 
-## Part 6 — The screen system
+## Part 10 — Header responsiveness
 
 ```css
-.screen        { display: none; }
-.screen.active { display: block; }
+@media (max-width: 420px) {
+  .site-header h1 {
+    font-size: 18px;
+  }
+
+  .uni-logo {
+    height: 32px;
+  }
+}
 ```
+
+On very narrow screens, the title and logo become slightly smaller.
+
+This prevents the header from feeling cramped on mobile devices.
+
+---
+
+## Part 11 — Footer
 
 ```html
-<div id="scr-group" class="screen active"> ... </div>
-<div id="scr-consent" class="screen"> ... </div>
-<div id="scr-details" class="screen"> ... </div>
-<!-- etc. -->
+<footer class="site-footer">
+  <nav aria-label="Site links">
+    <a href="imprint.html">Impressum / Imprint</a>
+  </nav>
+</footer>
 ```
 
-All 9 screens of the app are present in the HTML at the same time, but only one is visible at once. By default every `.screen` has `display: none` — it is completely removed from the layout and takes up no space (different from `visibility: hidden` which hides the element but keeps its space).
+The footer contains a navigation landmark with a link to the imprint page.
 
-When JavaScript adds the class `active` to a screen, the rule `.screen.active { display: block; }` overrides the default and makes it visible. When you navigate to a new screen, JavaScript removes `active` from the current screen and adds it to the next one. This is how the whole single-page app works — no page reloads, just CSS class toggling.
+```css
+.site-footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
 
-**`.screen.active`** is a compound selector — it targets elements that have both the class `screen` AND the class `active` at the same time.
+.site-footer a {
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  text-decoration: underline;
+}
+```
+
+The footer is styled through the external CSS file. There are no inline styles here.
+
+The `<nav>` element is given `aria-label="Site links"` so assistive technologies know what kind of navigation this is.
 
 ---
 
-## Part 7 — Typography
+## Part 12 — Typography
 
 ```css
-h2 { margin: 0 0 6px; font-size: 20px; }
-h3 { margin: 0 0 6px; font-size: 17px; }
-p  { margin: 0 0 10px; color: var(--muted); }
-ul { margin: 6px 0 10px 20px; color: var(--muted); }
-li { margin: 4px 0; }
-.muted { color: var(--muted); font-size: 13px; }
+h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+h3 {
+  margin: 0 0 6px;
+  font-size: 17px;
+}
+
+p {
+  margin: 0 0 10px;
+  color: var(--muted);
+}
+
+ul {
+  margin: 6px 0 10px 20px;
+  color: var(--muted);
+}
+
+li {
+  margin: 4px 0;
+}
+
+.subtitle {
+  color: var(--muted);
+}
+
+.footnote {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 14px;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.req {
+  color: #c00;
+}
 ```
 
-**`margin: 0 0 6px`** is shorthand for top/right/bottom/left margins. When three values are given: first = top, second = left and right, third = bottom. So this means: 0 top, 0 left/right, 6px bottom. The bottom margin creates spacing below each heading.
+The typography rules keep headings, paragraphs, lists, subtitles, and footnotes consistent.
 
-**`color: var(--muted)`** sets paragraph and list text to `#444444` — dark grey rather than pure black. Pure black on white can feel harsh; slightly softened text is easier to read.
+The `.muted` class is used for secondary text.
 
-**`.muted`** is a utility class used on small helper text like footnotes and placeholder labels.
+The `.req` class marks required fields with a red asterisk.
 
 ---
 
-## Part 8 — The row layout
+## Part 13 — Screen system
 
 ```css
-.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.screen {
+  display: none;
+}
+
+.screen.active {
+  display: block;
+}
 ```
 
-`.row` is used whenever buttons, pills, or inputs need to sit side by side — for example the "Agree and continue" and "Decline" buttons on the consent screen.
+All screens are present in `index.html`, but only one screen should be visible at a time.
 
-- `display: flex` — arranges children in a row
-- `flex-wrap: wrap` — if items don't fit on one line, they wrap to a new line instead of overflowing
-- `gap: 10px` — spacing between items (works like margin but only between items, not on the outside)
-- `align-items: center` — vertically centres all items
+By default, `.screen` elements are hidden with `display: none`.
+
+When JavaScript adds the `active` class, the screen becomes visible.
+
+Example:
+
+```html
+<section id="scr-group" class="screen active">
+  ...
+</section>
+
+<section id="scr-consent" class="screen">
+  ...
+</section>
+```
+
+The first screen starts active. JavaScript later removes and adds the `active` class to move through the app.
+
+This is how the website behaves like a single-page application without reloading the page.
 
 ---
 
-## Part 9 — Form elements: inputs and selects
+## Part 14 — Rows and grids
 
 ```css
-input, select {
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+```
+
+`.row` is used when buttons or controls should sit next to each other.
+
+`flex-wrap: wrap` lets items move onto a new line when there is not enough space.
+
+`.grid-2` creates two equal columns.
+
+`.grid-3` creates three equal columns.
+
+`.full` makes an element span across all columns.
+
+---
+
+## Part 15 — Responsive grids
+
+```css
+@media (max-width: 600px) {
+  .grid-2,
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+```
+
+On smaller screens, two-column and three-column grids collapse into a single column.
+
+This prevents form fields and cards from becoming too narrow on mobile devices.
+
+---
+
+## Part 16 — Form elements
+
+```css
+label {
+  display: block;
+  margin: 12px 0 5px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+input,
+select,
+textarea {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius-input);
   font-family: inherit;
   font-size: 15px;
   background: var(--white);
   color: var(--uni-black);
+  min-height: 44px;
 }
-input:focus, select:focus {
-  outline: 2px solid var(--uni-yellow);
-  outline-offset: 1px;
-}
-input[type="checkbox"] { width: auto; margin: 0; }
 ```
 
-**`width: 100%`** makes every input stretch to fill its container.
+Labels are displayed as block elements so they sit above form fields.
 
-**`font-family: inherit`** and **`font-size: inherit`** on selects: browsers apply their own fonts to `<select>` elements by default. `inherit` forces them to use the same font as the rest of the page.
+Inputs, selects, and text areas fill the available width.
 
-**`input:focus, select:focus`** — `:focus` is a pseudo-class that applies when the user has clicked on or tabbed into an element. Here it adds a 2px yellow outline, which signals to the user which field is currently active. `outline-offset: 1px` adds a tiny gap between the element border and the focus ring.
+`font-family: inherit` makes form elements use the same font as the rest of the page.
 
-**`input[type="checkbox"] { width: auto; }`** — the `[type="checkbox"]` attribute selector targets only checkboxes. The general `input` rule above sets `width: 100%` which would make a checkbox stretch across the full width — wrong. `width: auto` overrides this for checkboxes specifically. The `!important` is not needed here since the attribute selector is more specific.
+`min-height: 44px` helps make form fields easier to use on touchscreens.
 
 ---
 
-## Part 10 — Buttons
+## Part 17 — Focus styles
+
+```css
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--uni-yellow);
+  outline-offset: 2px;
+}
+```
+
+This rule creates a visible yellow focus outline for form fields.
+
+Focus styles are important for keyboard navigation. They show which element is currently active.
+
+`outline-offset: 2px` places the outline slightly outside the element border, making it easier to see.
+
+---
+
+## Part 18 — Checkboxes and radio buttons
+
+```css
+input[type="checkbox"],
+input[type="radio"] {
+  width: auto !important;
+  min-height: auto;
+  background: transparent !important;
+  border: none !important;
+  box-sizing: content-box !important;
+  margin: 0 !important;
+  width: 20px !important;
+  height: 20px !important;
+  cursor: pointer;
+}
+```
+
+The general input rule makes normal fields full width. That would look wrong for checkboxes and radio buttons.
+
+This rule overrides the general input styles for checkboxes and radio buttons.
+
+They are kept at 20px by 20px and remain easy to click.
+
+---
+
+## Part 19 — Fieldsets and legends
+
+```css
+fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+legend {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 6px;
+  padding: 0;
+}
+```
+
+`<fieldset>` and `<legend>` are used to group related radio buttons and checkboxes.
+
+For example, a yes/no question can be grouped under one legend.
+
+The default browser fieldset border is removed so the form still matches the design.
+
+This improves accessibility because screen readers can announce the question and the available options as one group.
+
+---
+
+## Part 20 — Buttons
 
 ```css
 button {
-  padding: 10px 18px;
+  padding: 12px 20px;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius-input);
   font-family: inherit;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
   background: var(--uni-yellow);
   color: var(--uni-black);
+  min-height: 44px;
+  touch-action: manipulation;
 }
-button:hover   { opacity: .88; }
-button:active  { opacity: .75; }
-button[disabled] { opacity: .45; cursor: not-allowed; }
+
+button:hover {
+  opacity: .88;
+}
+
+button:active {
+  opacity: .75;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--uni-black);
+  outline-offset: 2px;
+}
+
+button[disabled] {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
 .btn-ghost {
   background: var(--pill-bg);
   color: var(--uni-black);
@@ -254,21 +680,21 @@ button[disabled] { opacity: .45; cursor: not-allowed; }
 }
 ```
 
-The default `button` style is yellow — the primary action. Every button on the page gets this style automatically.
+Buttons use the University of Graz yellow as the primary action colour.
 
-**`cursor: pointer`** changes the mouse cursor to a hand on hover, signalling it is clickable.
+`min-height: 44px` supports touch use.
 
-**`:hover`** applies when the mouse is over the button. `opacity: .88` makes it slightly transparent — a subtle visual response.
+`:hover` and `:active` give visual feedback.
 
-**`:active`** applies while the button is being clicked. `opacity: .75` makes it more transparent, giving a "press" feel.
+`:focus-visible` shows a keyboard focus outline when a button is reached by keyboard.
 
-**`button[disabled]`** applies when the button has the HTML `disabled` attribute. `opacity: .45` makes it look faded. `cursor: not-allowed` shows the ⛔ cursor.
+`button[disabled]` makes disabled buttons appear faded.
 
-**`.btn-ghost`** is a modifier class added alongside `button` for secondary actions like "Back" or "Stop". It overrides the yellow background to grey, making it look less prominent than the primary button.
+`.btn-ghost` is used for secondary actions such as Back, Stop, or Microphone setup.
 
 ---
 
-## Part 11 — Pills
+## Part 21 — Pills
 
 ```css
 .pill {
@@ -282,28 +708,93 @@ The default `button` style is yellow — the primary action. Every button on the
 }
 ```
 
-Pills are the small status labels like "Item 3 / 22" or "Microphone: not started" on the recording screen.
+Pills are small rounded labels.
 
-**`display: inline-block`** makes the element flow with text (like a word) but also allows padding and a fixed size (like a block). Needed here so the pill doesn't stretch full-width.
+They are used for status information such as microphone status, item progress, or task state.
 
-**`border-radius: 999px`** — a very large border-radius value that guarantees fully rounded ends regardless of the element's height. Any value larger than half the element's height produces the same pill shape.
+`border-radius: 999px` creates the fully rounded pill shape.
 
 ---
 
-## Part 12 — Screen 0: group selection cards
+## Part 22 — Divider
+
+```css
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 20px 0;
+}
+```
+
+The `.divider` class creates a horizontal line.
+
+It is used to visually separate parts of a screen, for example between form content and navigation buttons.
+
+---
+
+## Part 23 — Hidden utility
+
+```css
+.hidden {
+  display: none !important;
+}
+```
+
+The `.hidden` class hides optional content.
+
+JavaScript adds and removes this class for conditional questionnaire sections.
+
+For example, if a participant answers “yes” to a question, a follow-up field can be shown. If they answer “no”, the follow-up field stays hidden.
+
+---
+
+## Part 24 — Group selection cards
 
 ```html
-<div class="group-grid">
-  <div class="group-card" id="btnGroupDE">
-    <div class="flag">🇦🇹</div>
-    <div class="grp-label">Native Austrian German speaker</div>
-    <div class="grp-sub">Meine Muttersprache ist Deutsch</div>
+<section id="scr-group" class="screen active">
+  <h2>Welcome / Willkommen</h2>
+
+  <div class="group-grid">
+    <div
+      class="group-card"
+      id="btnGroupEN"
+      role="button"
+      tabindex="0"
+      aria-label="Native English speaker"
+    >
+      <div class="flag">🇬🇧</div>
+      <div class="grp-label">Native English speaker</div>
+      <div class="grp-sub">English is my first language</div>
+    </div>
+
+    <div
+      class="group-card"
+      id="btnGroupDE"
+      role="button"
+      tabindex="0"
+      aria-label="Muttersprachler Deutsch"
+    >
+      <div class="flag">🇦🇹</div>
+      <div class="grp-label">Muttersprachler Deutsch</div>
+      <div class="grp-sub">Meine Muttersprache ist Deutsch</div>
+    </div>
   </div>
-  <div class="group-card" id="btnGroupEN">
-    ...
-  </div>
-</div>
+</section>
 ```
+
+The first screen asks participants to choose their group.
+
+The cards are visually styled as large selection buttons.
+
+`role="button"` tells assistive technologies that the card behaves like a button.
+
+`tabindex="0"` makes the card reachable with the keyboard.
+
+`aria-label` gives each card a clear accessible name.
+
+---
+
+## Part 25 — Group selection CSS
 
 ```css
 .group-grid {
@@ -312,6 +803,7 @@ Pills are the small status labels like "Item 3 / 22" or "Microphone: not started
   gap: 14px;
   margin-top: 16px;
 }
+
 .group-card {
   border: 2px solid var(--border);
   border-radius: 14px;
@@ -319,22 +811,88 @@ Pills are the small status labels like "Item 3 / 22" or "Microphone: not started
   cursor: pointer;
   text-align: center;
   transition: border-color .15s;
+  background: var(--white);
+  outline-offset: 3px;
 }
-.group-card:hover { border-color: var(--uni-yellow); }
-@media (max-width: 520px) { .group-grid { grid-template-columns: 1fr; } }
+
+.group-card:hover {
+  border-color: var(--uni-yellow);
+}
+
+.group-card:focus {
+  outline: 2px solid var(--uni-yellow);
+  border-color: var(--uni-yellow);
+}
+
+.group-card .flag {
+  font-size: 38px;
+  margin-bottom: 10px;
+  line-height: 1;
+}
+
+.group-card .grp-label {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--uni-black);
+}
+
+.group-card .grp-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+}
 ```
 
-**`display: grid`** activates CSS Grid — a layout system for two-dimensional arrangements.
+The group cards use CSS Grid for the layout and card styling for the clickable options.
 
-**`grid-template-columns: 1fr 1fr`** creates two equal columns. `1fr` means "1 fraction of the available space". Two `1fr` columns each get 50% of the width.
+The hover and focus rules show yellow outlines or borders when a card is active.
 
-**`transition: border-color .15s`** animates the border colour change smoothly over 0.15 seconds when the user hovers. Without this, the border would snap instantly from grey to yellow.
-
-**`@media (max-width: 520px)`** is a media query — CSS that only applies when the screen is 520px wide or narrower. On small screens the two-column grid becomes one column so the cards stack vertically instead of being squashed side by side.
+This makes the interaction visible for both mouse users and keyboard users.
 
 ---
 
-## Part 13 — Screen 1: consent scroll box
+## Part 26 — Group selection responsiveness
+
+```css
+@media (max-width: 520px) {
+  .group-grid {
+    grid-template-columns: 1fr;
+  }
+}
+```
+
+On small screens, the two group cards stack vertically.
+
+This avoids squeezing both cards into a narrow row.
+
+---
+
+## Part 27 — Consent scroll box
+
+```html
+<section id="scr-consent" class="screen">
+  <h2>Participant Information & Consent</h2>
+
+  <div class="consent-box" tabindex="0">
+    ...
+  </div>
+
+  <div class="scroll-hint">
+    <span class="scroll-dot"></span>
+    Scroll inside the box to read all information ↓
+  </div>
+</section>
+```
+
+The consent text is displayed in a scrollable box.
+
+The box keeps long information text manageable while still allowing participants to read the full content.
+
+`tabindex="0"` allows keyboard users to focus the scroll box and scroll inside it.
+
+---
+
+## Part 28 — Consent scroll box CSS
 
 ```css
 .consent-box {
@@ -344,32 +902,81 @@ Pills are the small status labels like "Item 3 / 22" or "Microphone: not started
   border-radius: 10px;
   padding: 14px 16px;
   background: var(--pill-bg);
+  font-size: 15px;
+  line-height: 1.5;
   scrollbar-width: auto;
   scrollbar-color: rgba(0,0,0,.3) rgba(0,0,0,.06);
 }
-.consent-box::-webkit-scrollbar       { width: 10px; }
-.consent-box::-webkit-scrollbar-track { background: rgba(0,0,0,.05); border-radius: 999px; }
-.consent-box::-webkit-scrollbar-thumb { background: rgba(0,0,0,.25); border-radius: 999px; }
+
+.consent-box::-webkit-scrollbar {
+  width: 10px;
+}
+
+.consent-box::-webkit-scrollbar-track {
+  background: rgba(0,0,0,.05);
+  border-radius: 999px;
+}
+
+.consent-box::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,.25);
+  border-radius: 999px;
+}
 ```
 
-**`max-height: 300px`** — the box grows up to 300px tall, then stops growing. Content beyond that is hidden.
+`max-height: 300px` limits the height of the consent box.
 
-**`overflow-y: scroll`** — always shows a vertical scrollbar (even if the content fits). This makes it obvious to participants that there is more to read below.
+`overflow-y: scroll` makes the box scroll vertically.
 
-**`scrollbar-width: auto` and `scrollbar-color`** — Firefox-specific scrollbar styling. Two colours: the thumb (the draggable part) and the track (the background).
+The scrollbar styling makes the scroll area more visible.
 
-**`::-webkit-scrollbar`** rules — Chrome, Edge, and Safari use a different system for custom scrollbars. `::` introduces a pseudo-element — a specific part of an element you can style separately. These three rules style the scrollbar width, track background, and thumb colour for Chromium-based browsers.
+The `::-webkit-scrollbar` rules apply to Chromium-based browsers and Safari. `scrollbar-width` and `scrollbar-color` apply to Firefox.
 
 ---
 
-## Part 14 — Screen 1: consent checkbox
+## Part 29 — Scroll hint
+
+```css
+.scroll-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 6px 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scroll-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--uni-yellow);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+```
+
+The scroll hint reminds participants that the consent information is inside a scrollable box.
+
+The yellow dot provides a small visual accent without making the hint too prominent.
+
+---
+
+## Part 30 — Consent checkbox
 
 ```html
 <div class="consent-check">
-  <input type="checkbox" id="consentChk" />
-  <span>I have read the information above and I consent to participate.</span>
+  <input type="checkbox" id="consentChk">
+  <label for="consentChk">
+    I have read the information above and I consent to participate in this study.
+  </label>
 </div>
 ```
+
+The checkbox is connected to its label with `for="consentChk"` and `id="consentChk"`.
+
+This improves usability because clicking the label also toggles the checkbox.
+
+It also helps screen readers identify the checkbox correctly.
 
 ```css
 .consent-check {
@@ -378,67 +985,289 @@ Pills are the small status labels like "Item 3 / 22" or "Microphone: not started
   gap: 10px;
   margin: 14px 0;
 }
+
+.consent-check label {
+  font-size: 15px;
+  color: var(--uni-black);
+  line-height: 1.4;
+  font-weight: 400;
+  margin: 0;
+}
 ```
 
-The checkbox and its label text are wrapped in a flex container so they sit side by side. `align-items: flex-start` aligns them to the top rather than the centre — important if the label text wraps to multiple lines, so the checkbox stays at the top rather than floating in the middle.
+The checkbox and label are displayed side by side.
 
-The `id="consentChk"` on the input is referenced by JavaScript to check whether it has been ticked before allowing the user to continue.
+`align-items: flex-start` keeps the checkbox aligned with the first line of the label.
 
 ---
 
-## Part 15 — Screen 2: participant details grid
+## Part 31 — Participant details grid
 
 ```css
 .details-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0 20px;
+  margin-top: 10px;
 }
-.details-grid .full { grid-column: 1 / -1; }
-@media (max-width: 520px) { .details-grid { grid-template-columns: 1fr; } }
+
+@media (max-width: 520px) {
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+}
 ```
 
-The participant details form uses a two-column grid so fields like year of birth and sex sit side by side.
+Participant details are arranged in two columns on wider screens.
 
-**`gap: 0 20px`** — two values for gap: first = row gap (0, no vertical gap between rows), second = column gap (20px between columns).
+On smaller screens, the fields collapse into one column.
 
-**`.details-grid .full`** — a descendant selector targeting elements with class `full` that are inside `.details-grid`. `grid-column: 1 / -1` makes that element span from the first column to the last (−1 means "the end"). This is used for the Participant ID field so it takes up the full width rather than just half.
+This makes the form readable and usable on both desktop and mobile screens.
 
 ---
 
-## Part 16 — Screen 4: task cards
-
-```html
-<div class="task-grid">
-  <div class="task-card">
-    <h3>Task A — English reading</h3>
-    <p>Read short English sentences aloud and record each one.</p>
-    <button id="btnPickA">Start Task A</button>
-  </div>
-  <div class="task-card"> ... </div>
-</div>
-```
+## Part 32 — Questionnaire cards
 
 ```css
-.task-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
-.task-card { border: 1px solid var(--border); border-radius: 14px; padding: 20px; background: var(--pill-bg); }
-.done-badge {
-  display: inline-block;
-  background: var(--uni-yellow);
-  font-size: 12px; font-weight: 700;
-  padding: 2px 10px;
-  border-radius: 999px;
-  margin-bottom: 8px;
+.q-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 12px;
 }
 ```
 
-Same two-column grid as the group selection. Each task is a card with a light grey background (`var(--pill-bg)`).
+Questionnaire sections are shown as smaller cards.
 
-**`.done-badge`** is a yellow pill that JavaScript will add to a task card once that task is completed. It's defined in the CSS now even though it won't appear until the JavaScript adds it — CSS rules don't cause anything to appear on their own, they just describe how an element looks if it exists.
+This visually separates groups of related questions and makes the questionnaire easier to scan.
 
 ---
 
-## Part 17 — Screen 7: the recording prompt
+## Part 33 — Step badges
+
+```css
+.step-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.step-badge {
+  display: inline-block;
+  background: var(--pill-bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+```
+
+Step badges show the participant where they are in the multi-step questionnaire.
+
+`flex-wrap: wrap` prevents badges from overflowing on smaller screens.
+
+---
+
+## Part 34 — Inline choices
+
+```css
+.choice-inline {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.choice-inline label {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  font-weight: 400;
+  margin: 4px 0;
+  cursor: pointer;
+}
+```
+
+`.choice-inline` is used for radio button groups such as Yes/No questions.
+
+The labels are displayed as flex rows so the radio button and text sit neatly next to each other.
+
+`cursor: pointer` makes it clear that the label can be clicked.
+
+---
+
+## Part 35 — Checkbox groups
+
+```css
+.checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.checkbox-group label {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  font-weight: 400;
+  margin: 4px 0;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .checkbox-group {
+    grid-template-columns: 1fr;
+  }
+}
+```
+
+Checkbox groups can contain several options, such as language categories or perceived change categories.
+
+On wide screens, the options are arranged in three columns.
+
+On small screens, they collapse into one column.
+
+---
+
+## Part 36 — Task selection cards
+
+```html
+<section id="scr-taskselect" class="screen">
+  <h2>Choose a task</h2>
+  <p>You must complete both tasks. You may do them in any order.</p>
+
+  <div id="taskGrid" class="task-grid"></div>
+</section>
+```
+
+The task selection screen contains an empty `#taskGrid`.
+
+The task cards are created by JavaScript from the task data in `data/tasks.json`.
+
+This means the HTML does not manually list the task cards. The page structure provides a container, and JavaScript fills it with the available tasks.
+
+---
+
+## Part 37 — Task card CSS
+
+```css
+.task-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.task-card {
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  padding: 28px 20px;
+  background: var(--white);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color .15s, background .15s;
+  outline-offset: 3px;
+}
+
+.task-card:hover {
+  border-color: var(--uni-yellow);
+}
+
+.task-card:focus {
+  outline: 2px solid var(--uni-yellow);
+  border-color: var(--uni-yellow);
+}
+
+.task-card .task-flag {
+  font-size: 38px;
+  margin-bottom: 10px;
+  line-height: 1;
+}
+
+.task-card .task-name {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--uni-black);
+}
+
+.task-card.done {
+  background: var(--pill-bg);
+  border-color: var(--border);
+  cursor: default;
+  opacity: 0.45;
+  pointer-events: none;
+}
+```
+
+Task cards behave similarly to the group selection cards.
+
+The `.done` class is added by JavaScript when a task has already been completed.
+
+`pointer-events: none` prevents completed cards from being clicked again.
+
+---
+
+## Part 38 — Task grid responsiveness
+
+```css
+@media (max-width: 560px) {
+  .task-grid {
+    grid-template-columns: 1fr;
+  }
+}
+```
+
+On smaller screens, task cards stack vertically.
+
+This keeps the card text readable and prevents the layout from becoming cramped.
+
+---
+
+## Part 39 — Microphone setup
+
+```css
+.mic-row {
+  margin-top: 10px;
+}
+
+.mic-row .row {
+  margin-top: 6px;
+}
+
+.mic-row select {
+  flex: 1;
+}
+
+.test-box {
+  margin-top: 16px;
+  background: var(--pill-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.test-prompt {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 10px 0;
+  color: var(--uni-black);
+}
+```
+
+The microphone setup screen includes a device picker and a test recording section.
+
+`.test-box` visually separates the test recording from the rest of the microphone setup.
+
+The test prompt is slightly larger and bold because participants need to read it aloud.
+
+---
+
+## Part 40 — Recording prompt
 
 ```css
 .prompt-display {
@@ -447,20 +1276,84 @@ Same two-column grid as the group selection. Each task is a card with a light gr
   line-height: 1.2;
   margin: 20px 0 12px;
   word-break: break-word;
+  color: var(--uni-black);
+}
+
+@media (max-width: 520px) {
+  .prompt-display {
+    font-size: 28px;
+  }
 }
 ```
 
-This is the large centred text showing the sentence the participant needs to read aloud.
+The recording prompt is the sentence participants read aloud.
 
-**`font-size: 38px`** — much larger than normal body text so the participant can read it at a glance while speaking without leaning in.
+It is large and centred because it needs to be readable while speaking.
 
-**`line-height: 1.2`** — tighter line spacing than body text (which uses 1.5). Longer sentences that wrap to two lines don't take up too much vertical space.
+On smaller screens, the font size is reduced from 38px to 28px so the sentence still fits comfortably.
 
-**`word-break: break-word`** — if a single word is too long to fit on one line (unlikely for normal sentences but important for safety), it breaks mid-word rather than overflowing out of the container.
+`word-break: break-word` prevents very long words from overflowing the card.
 
 ---
 
-## Part 18 — The upload overlay
+## Part 41 — Prime word box
+
+```css
+.prime-box {
+  background: var(--pill-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin: 12px 0;
+}
+
+.prime-label {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.prime-words {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.prime-word {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-weight: 700;
+  font-size: 16px;
+}
+```
+
+The prime words are displayed above the carrier sentence.
+
+Each prime word is styled as a rounded pill.
+
+`flex-wrap: wrap` allows the prime words to move onto another line if there is not enough space.
+
+---
+
+## Part 42 — Upload overlay
+
+```html
+<div id="overlay" class="overlay" aria-hidden="true">
+  <div class="overlay-box">
+    <div class="spinner" aria-hidden="true"></div>
+    <div>
+      <strong id="overlayTitle">Uploading… please wait</strong>
+      <p id="overlayMsg">Do not close this tab.</p>
+    </div>
+  </div>
+</div>
+```
+
+The upload overlay appears while files are being saved.
+
+It prevents participants from clicking other controls during upload.
 
 ```css
 .overlay {
@@ -472,44 +1365,245 @@ This is the large centred text showing the sentence the participant needs to rea
   background: rgba(255,255,255,.82);
   z-index: 9999;
 }
-.overlay.active { display: flex; }
+
+.overlay.active {
+  display: flex;
+}
+
+.overlay-box {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 400px;
+  width: 90vw;
+}
+```
+
+`position: fixed` makes the overlay cover the viewport.
+
+`inset: 0` is shorthand for top, right, bottom, and left all being set to 0.
+
+`.overlay.active` is shown with `display: flex`.
+
+The overlay box is centred on the page.
+
+---
+
+## Part 43 — Spinner animation
+
+```css
 .spinner {
-  width: 20px; height: 20px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   border: 3px solid var(--border);
   border-top-color: var(--uni-black);
   animation: spin 1s linear infinite;
+  flex-shrink: 0;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 ```
 
-The overlay appears while a recording is uploading to prevent the participant from clicking anything.
+The spinner is a small circular loading indicator.
 
-**`position: fixed`** — positions the element relative to the browser viewport, not the page. It stays in place even if the user scrolls.
+It uses a full grey border and a black top border.
 
-**`inset: 0`** — shorthand for `top: 0; right: 0; bottom: 0; left: 0`. Makes the overlay cover the entire screen.
+The `spin` animation rotates it continuously.
 
-**`display: flex` with `align-items: center; justify-content: center`** — centres the spinner box both horizontally and vertically in the screen.
+`linear` means the speed stays constant.
 
-**`background: rgba(255,255,255,.82)`** — 82% opaque white, so the page content is visible but dimmed underneath.
-
-**`z-index: 9999`** — controls stacking order. Elements with higher z-index appear in front. 9999 ensures the overlay is always on top of everything else.
-
-The spinner is a CSS animation. **`border-radius: 50%`** makes the square div into a circle. The element has a full grey border but one side (`border-top-color`) is set to black — creating the arc effect. **`@keyframes spin`** defines the animation: rotate from 0 to 360 degrees. **`animation: spin 1s linear infinite`** applies it — run the `spin` animation over 1 second, at constant speed, looping forever.
+`infinite` means the animation repeats until the overlay is hidden.
 
 ---
 
-## Part 19 — The footer
+## Part 44 — Done state
 
-```html
-<div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border);text-align:center">
-  <a href="imprint.html" style="font-size:12px;color:var(--muted);text-decoration:none">Impressum / Imprint</a>
-</div>
+```css
+.alldone-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px 0;
+  gap: 10px;
+}
+
+.alldone-emoji {
+  font-size: 52px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.alldone-title {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.alldone-sub {
+  font-size: 16px;
+  color: var(--muted);
+}
 ```
 
-A simple footer at the bottom of the card with a link to the imprint page. The styles here are written inline (directly in the `style` attribute) rather than in the `<style>` block — this is fine for one-off styles that apply to a single element and won't be reused anywhere else.
+The all-done state is shown when both tasks are completed.
 
-**`text-decoration: none`** removes the default blue underline from the link.
+It uses centred text and a large emoji to give participants clear feedback that the session is finished.
 
-**`<a href="imprint.html">`** is an anchor element — the standard HTML element for links. `href` is the destination. Since `imprint.html` is in the same folder as `index.html`, no path prefix is needed.
+---
 
+## Part 45 — Confetti animation
+
+```css
+.confetti-piece {
+  position: fixed;
+  top: -40px;
+  pointer-events: none;
+  z-index: 9999;
+  animation: confettiFall linear forwards;
+  user-select: none;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(110vh) rotate(540deg);
+    opacity: 0;
+  }
+}
+```
+
+JavaScript creates individual confetti elements when both tasks are completed.
+
+The CSS controls how those elements fall.
+
+`position: fixed` places each confetti piece relative to the viewport.
+
+`pointer-events: none` makes sure confetti does not block buttons or links.
+
+The animation moves each piece down the screen, rotates it, and fades it out.
+
+---
+
+## Part 46 — Audio element
+
+```css
+audio {
+  width: 100%;
+}
+```
+
+The test recording can be played back through an audio element.
+
+Setting `width: 100%` makes the audio control fit neatly inside the card.
+
+---
+
+## Part 47 — Reduced motion
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  .confetti-piece {
+    animation: none;
+  }
+
+  .spinner {
+    animation: none;
+    border-top-color: var(--uni-black);
+  }
+
+  .group-card {
+    transition: none;
+  }
+}
+```
+
+This media query respects the user’s reduced-motion preference.
+
+If the user has requested reduced motion in their operating system or browser, decorative animations are disabled.
+
+The confetti animation stops.
+
+The spinner animation stops.
+
+Group card transitions are removed.
+
+This supports accessibility because some users find motion distracting or uncomfortable.
+
+---
+
+## Part 48 — How HTML and CSS work together
+
+The HTML defines what exists on the page.
+
+For example:
+
+```html
+<button id="btnStartRec">Start recording</button>
+```
+
+The CSS defines how it looks:
+
+```css
+button {
+  background: var(--uni-yellow);
+  border-radius: var(--radius-input);
+  min-height: 44px;
+}
+```
+
+JavaScript defines what it does:
+
+```js
+btnStartRec.addEventListener("click", startRecording);
+```
+
+The three layers work together:
+
+* HTML gives the page structure.
+* CSS gives the page layout and visual design.
+* JavaScript gives the page behaviour.
+
+---
+
+## Part 49 — Why the final structure is useful
+
+The final project separates the main concerns into different files:
+
+```text
+index.html       structure
+css/styles.css   design and responsive layout
+js/app.js        behaviour and recording logic
+data/tasks.json  task and stimulus data
+imprint.html     legal/imprint page
+```
+
+This is easier to maintain than a single large HTML file.
+
+The HTML can be checked with the Nu HTML Checker.
+
+The CSS can be inspected separately.
+
+The JavaScript can be extended without rewriting the page structure.
+
+The data can be changed without editing the main app code.
+
+This structure is also clearer for a final university submission because it shows how the project moved from a prototype into a deployable website.
