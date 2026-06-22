@@ -446,6 +446,19 @@
   /* ═══════════════════════════════════════════
      TASK GRID (task selection screen)
   ═══════════════════════════════════════════ */
+  const FLAG_SVG_UK = `<svg viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg">
+    <clipPath id="flagUkClipTask"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath>
+    <path d="M0,0 v30 h60 v-30 z" fill="#00247d"/>
+    <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/>
+    <path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#flagUkClipTask)" stroke="#cf142b" stroke-width="4"/>
+    <path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/>
+    <path d="M30,0 v30 M0,15 h60" stroke="#cf142b" stroke-width="6"/>
+  </svg>`;
+  const FLAG_SVG_AT = `<svg viewBox="0 0 3 2" xmlns="http://www.w3.org/2000/svg">
+    <rect width="3" height="2" fill="#ED2939"/>
+    <rect width="3" height="0.6667" y="0.6667" fill="#fff"/>
+  </svg>`;
+
   function buildTaskGrid(group) {
     const grid = $("#taskGrid");
     if (!grid) return;
@@ -462,7 +475,7 @@
       card.id = `btnPick${def.id}`;
       card.setAttribute("role", "button");
       card.setAttribute("tabindex", "0");
-      const flags = { A: "🇬🇧", B: "🇦🇹" };
+      const flags = { A: FLAG_SVG_UK, B: FLAG_SVG_AT };
       const flag = flags[def.id] || "";
       card.innerHTML = `<div class="task-flag" aria-hidden="true">${flag}</div><div class="task-name">${name}</div>`;
       grid.appendChild(card);
@@ -555,6 +568,29 @@
     try { window.close(); } catch (e) {}
   });
 
+  function buildConsentCsvBlob() {
+    const header = ["session_id", "session_start_iso", "consent_time_iso", "participant_id", "group", "year_of_birth", "sex", "bundesland", "city"];
+    const row    = [sessionId, sessionStartIso, consentTimeIso, meta.pid, selectedGroup, meta.birthYear, meta.sex, meta.bundesland, meta.city];
+    const lines  = [header.join(","), row.map(csvEscape).join(",")];
+    return new Blob([lines.join("\n")], { type: "text/csv" });
+  }
+
+  async function uploadConsentIfNeeded() {
+    if (consentUploaded || !consentGiven || !consentTimeIso) return;
+    const blob = buildConsentCsvBlob();
+    const name = `${meta.pid}__CONSENT__${isoSafeNow()}__S${sessionId}.csv`;
+    setOverlay(true, UI[selectedGroup].overlayUpload, UI[selectedGroup].overlayWait);
+    try {
+      await uploadBlob(blob, name, meta.pid, "CONSENT", "consent");
+    } catch (e) {
+      console.warn(e);
+      saveLocal(blob, name);
+    } finally {
+      setOverlay(false);
+    }
+    consentUploaded = true;
+  }
+
   /* ═══════════════════════════════════════════
      DETAILS — DE GROUP (short form)
   ═══════════════════════════════════════════ */
@@ -573,12 +609,13 @@
     if (el) el.addEventListener(el.tagName === "SELECT" ? "change" : "input", checkDeForm);
   });
 
-  $("#btnDeDetailsContinue").addEventListener("click", () => {
+  $("#btnDeDetailsContinue").addEventListener("click", async () => {
     meta.pid        = $("#de-pid").value.trim();
     meta.birthYear  = $("#de-birthYear").value.trim();
     meta.sex        = $("#de-sex").value;
     meta.bundesland = $("#de-state").value;
     meta.city       = $("#de-city").value.trim();
+    await uploadConsentIfNeeded();
     show(screens.taskselect);
     updateTaskGrid();
   });
@@ -603,12 +640,13 @@
     if (el) el.addEventListener(el.tagName === "SELECT" ? "change" : "input", checkEnForm);
   });
 
-  $("#btnEnDetailsContinue").addEventListener("click", () => {
+  $("#btnEnDetailsContinue").addEventListener("click", async () => {
     meta.pid        = $("#en-pid").value.trim();
     meta.birthYear  = $("#en-birthYear").value.trim();
     meta.sex        = $("#en-sex").value;
     meta.bundesland = $("#en-state").value;
     meta.city       = $("#en-city").value.trim();
+    await uploadConsentIfNeeded();
     // Sync arrival-year computed fields with birth year if available
     computeDerived();
     show(screens.q1);
@@ -949,23 +987,20 @@
     const btn = $("#btnQuestionnaireDone");
     btn.disabled = true;
     setOverlay(true, UI[selectedGroup].overlaySubmit, UI[selectedGroup].overlayWait);
+    const qData = collectQuestionnaireData();
+    const qBlob = buildCsvBlob(qData);
+    const qName = `${meta.pid}__QUESTIONNAIRE__${isoSafeNow()}__S${sessionId}.csv`;
     try {
-      const qData = collectQuestionnaireData();
-      const qBlob = buildCsvBlob(qData);
-      const qName = `${meta.pid}__QUESTIONNAIRE__${isoSafeNow()}__S${sessionId}.csv`;
       await uploadBlob(qBlob, qName, meta.pid, "QUESTIONNAIRE", "questionnaire");
-      questionnaireUploaded = true;
-      show(screens.taskselect);
-      updateTaskGrid();
     } catch (e) {
-      console.error(e);
-      alert(selectedGroup === "DE"
-        ? "Der Fragebogen konnte nicht übermittelt werden. Bitte versuchen Sie es erneut."
-        : "The questionnaire could not be submitted. Please try again.");
-    } finally {
-      setOverlay(false);
-      btn.disabled = false;
+      console.warn(e);
+      saveLocal(qBlob, qName);
     }
+    questionnaireUploaded = true;
+    setOverlay(false);
+    btn.disabled = false;
+    show(screens.taskselect);
+    updateTaskGrid();
   });
 
   /* ═══════════════════════════════════════════
