@@ -320,7 +320,8 @@ button[disabled] {
 
 .group-card:hover      { border-color: var(--uni-yellow); }
 .group-card:focus      { outline: 2px solid var(--uni-yellow); border-color: var(--uni-yellow); }
-.group-card .flag      { font-size: 38px; margin-bottom: 10px; line-height: 1; }
+.group-card .flag      { margin-bottom: 10px; display: flex; justify-content: center; }
+.group-card .flag svg  { width: 48px; height: 32px; border-radius: 3px; box-shadow: 0 0 0 1px var(--border); }
 .group-card .grp-label { font-weight: 700; font-size: 16px; color: var(--uni-black); }
 .group-card .grp-sub   { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
@@ -487,7 +488,8 @@ button[disabled] {
 .task-card:hover { border-color: var(--uni-yellow); }
 .task-card:focus { outline: 2px solid var(--uni-yellow); border-color: var(--uni-yellow); }
 
-.task-card .task-flag { font-size: 38px; margin-bottom: 10px; line-height: 1; }
+.task-card .task-flag { margin-bottom: 10px; display: flex; justify-content: center; }
+.task-card .task-flag svg { width: 48px; height: 32px; border-radius: 3px; box-shadow: 0 0 0 1px var(--border); }
 .task-card .task-name { font-weight: 700; font-size: 16px; color: var(--uni-black); }
 
 .task-card.done {
